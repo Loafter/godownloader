@@ -35,7 +35,9 @@ func TestWorker(*testing.T) {
 	tes := new(monitor.MonitoredWorker)
 	tes.Func = TFunc
 	tes.Start(10, 20)
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 4)
 	tes.Stop()
-	time.Sleep(time.Second * 2)
+
+	tes.Start(5, 10)
+	time.Sleep(time.Second * 8)
 }
