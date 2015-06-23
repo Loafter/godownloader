@@ -1,11 +1,12 @@
 package monitor
+
 import (
-	"sync"
-	"log"
-	"time"
 	"crypto/rand"
-	"fmt"
 	"errors"
+	"fmt"
+	"log"
+	"sync"
+	"time"
 )
 
 const (
@@ -20,6 +21,7 @@ func genUid() string {
 	rand.Read(b)
 	return fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 }
+
 type MonitoredWorker struct {
 	Func  func(interface{}, interface{}) (interface{}, interface{}, bool, error)
 	wgrun sync.WaitGroup
@@ -31,15 +33,14 @@ type MonitoredWorker struct {
 	to    interface{}
 }
 
-
 func (mw *MonitoredWorker) wgoroute() {
 	mw.wgrun.Add(1)
-	mw.state=Running
+	mw.state = Running
 	for {
 		select {
 		case newState := <-mw.chsig:
-			if (newState==Stopped) {
-				mw.state=newState
+			if newState == Stopped {
+				mw.state = newState
 				log.Println("info: work stopped")
 				mw.wgrun.Done()
 				return
@@ -49,21 +50,22 @@ func (mw *MonitoredWorker) wgoroute() {
 				var isdone bool
 				var err error
 				mw.from, mw.to, isdone, err = mw.Func(mw.from, mw.to)
-				if err!=nil {
+				if err != nil {
 					log.Println("error: work failed")
-					mw.state=Failed
+					mw.state = Failed
 					mw.wgrun.Done()
 					return
 				}
 				if isdone {
-					mw.state=Completed
+					mw.state = Completed
 					mw.wgrun.Done()
+					log.Println("info: work done")
 					return
 				}
 			}
 
 		}
-		time.Sleep(time.Millisecond*300)
+		time.Sleep(time.Millisecond * 300)
 	}
 }
 func (mw MonitoredWorker) GetState() int {
@@ -74,17 +76,20 @@ func (mw MonitoredWorker) GetId() string {
 
 }
 func (mw *MonitoredWorker) Start(from interface{}, to interface{}, prm ...interface{}) (string, error) {
-	if mw.state==Running {
+	mw.wgrun.Wait()
+	if mw.state == Running {
 		return "", errors.New("error: try start runing job")
 	}
-	mw.guid=genUid()
-	mw.chsig=make(chan int, 1)
+	mw.guid = genUid()
+	mw.chsig = make(chan int, 1)
+	mw.from = from
+	mw.to = to
 	go mw.wgoroute()
 	return "guid", nil
 }
 
 func (mw *MonitoredWorker) Stop() error {
-	if mw.state==Stopped {
+	if mw.state == Stopped {
 		return errors.New("error: can't stop stoped work")
 	}
 	mw.chsig <- Stopped
@@ -92,7 +97,7 @@ func (mw *MonitoredWorker) Stop() error {
 	return nil
 
 }
-func (mw MonitoredWorker)GetResult() (interface{}, interface{}) {
+func (mw MonitoredWorker) GetResult() (interface{}, interface{}) {
 	return mw.from, mw.to
 
 }
