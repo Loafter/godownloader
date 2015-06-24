@@ -3,51 +3,56 @@ package dtest
 import "godownloader/monitor"
 import "testing"
 import (
-	"log"
-	"time"
 	"errors"
+	"time"
 )
 
-
-
 type TestWork struct {
-	 From, To int
+	From, To int
 }
 
-func (tw TestWork)GetProgress() (interface{}){
-	return  tw.From;
+func (tw TestWork) GetProgress() interface{} {
+	return tw.From
 
 }
-func (tw *TestWork)DoWork() (bool,error){
+func (tw *TestWork) DoWork() (bool, error) {
 	time.Sleep(time.Millisecond * 300)
 	tw.From += 1
-	if tw.From > tw.To{
-		return false,errors.New("failed")
+	if tw.From > tw.To {
+		return false, errors.New("failed")
 	}
 	if tw.From == tw.To {
 		return true, nil
 	}
-	log.Println(tw)
 	return false, nil
 }
 
-func TestWorker(*testing.T) {
+func TestWorker(t *testing.T) {
 	tes := new(monitor.MonitoredWorker)
-	itw := &TestWork{From:1, To:8}
+	itw := &TestWork{From: 1, To: 8}
 	tes.Itw = itw
 	tes.Start()
 	time.Sleep(time.Second * 1)
-	log.Println("State:",tes.GetState())
+	if tes.GetState() != 1 {
+		t.Error("Expected Running(1)")
+		return
+	}
 	tes.Stop()
-	log.Println("State:",tes.GetState())
-
+	if tes.GetState() != 0 {
+		t.Error("Expected Stoped(0)")
+		return
+	}
 	tes.Start()
 	time.Sleep(time.Second * 9)
-	log.Println("State:",tes.GetState())
-	log.Println("Result:",tes.GetResult())
+	if tes.GetState() != 3 {
+		t.Error("Expected Comlete(3)")
+		return
+	}
 
 	tes.Start()
 	time.Sleep(time.Second * 1)
-	log.Println("State:",tes.GetState())
+	if tes.GetState() != 2 {
+		t.Error("Expected Failed(3)")
+		return
+	}
 }
-

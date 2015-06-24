@@ -22,7 +22,7 @@ func genUid() string {
 }
 
 type MonitoredWorker struct {
-	Itw IterationWork
+	Itw   IterationWork
 	wgrun sync.WaitGroup
 	guid  string
 	state int
@@ -31,9 +31,10 @@ type MonitoredWorker struct {
 }
 
 type IterationWork interface {
-	DoWork() (bool,error)
-	GetProgress()interface{}
+	DoWork() (bool, error)
+	GetProgress() interface{}
 }
+
 func (mw *MonitoredWorker) wgoroute() {
 	mw.wgrun.Add(1)
 	mw.state = Running
@@ -93,7 +94,7 @@ func (mw *MonitoredWorker) Stop() error {
 	return nil
 
 }
-func (mw MonitoredWorker) GetResult() (interface{}) {
+func (mw MonitoredWorker) GetResult() interface{} {
 	return mw.Itw.GetProgress()
 
 }
