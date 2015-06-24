@@ -3,41 +3,51 @@ package dtest
 import "godownloader/monitor"
 import "testing"
 import (
-	"errors"
 	"log"
 	"time"
+	"errors"
 )
 
-func TFunc(from interface{}, to interface{}) (interface{}, interface{}, bool, error) {
-	time.Sleep(time.Millisecond * 300)
 
-	var f, t int
-	var ok bool
-	f, ok = from.(int)
-	if !ok {
-		log.Println("error:  missmatch from type")
-		return nil, nil, false, errors.New("error:  missmatch from type")
-	}
-	t, ok = to.(int)
-	if !ok {
-		log.Println("error:  missmatch from type")
-		return nil, nil, false, errors.New("error:  missmatch to type")
-	}
-	f += 1
-	if f == t {
-		return f, t, true, nil
-	}
-	log.Println(f, t)
-	return f, t, false, nil
+
+type TestWork struct {
+	 From, To int
+}
+
+func (tw TestWork)GetProgress() (interface{}){
+	return  tw.From;
 
 }
+func (tw *TestWork)DoWork() (bool,error){
+	time.Sleep(time.Millisecond * 300)
+	tw.From += 1
+	if tw.From > tw.To{
+		return false,errors.New("failed")
+	}
+	if tw.From == tw.To {
+		return true, nil
+	}
+	log.Println(tw)
+	return false, nil
+}
+
 func TestWorker(*testing.T) {
 	tes := new(monitor.MonitoredWorker)
-	tes.Func = TFunc
-	tes.Start(10, 20)
-	time.Sleep(time.Second * 4)
+	itw := &TestWork{From:1, To:8}
+	tes.Itw = itw
+	tes.Start()
+	time.Sleep(time.Second * 1)
+	log.Println("State:",tes.GetState())
 	tes.Stop()
+	log.Println("State:",tes.GetState())
 
-	tes.Start(5, 10)
-	time.Sleep(time.Second * 8)
+	tes.Start()
+	time.Sleep(time.Second * 9)
+	log.Println("State:",tes.GetState())
+	log.Println("Result:",tes.GetResult())
+
+	tes.Start()
+	time.Sleep(time.Second * 1)
+	log.Println("State:",tes.GetState())
 }
+

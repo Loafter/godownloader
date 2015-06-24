@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 )
 
 const (
@@ -23,16 +22,18 @@ func genUid() string {
 }
 
 type MonitoredWorker struct {
-	Func  func(interface{}, interface{}) (interface{}, interface{}, bool, error)
+	Itw IterationWork
 	wgrun sync.WaitGroup
 	guid  string
 	state int
 	chsig chan int
 	stwg  sync.WaitGroup
-	from  interface{}
-	to    interface{}
 }
 
+type IterationWork interface {
+	DoWork() (bool,error)
+	GetProgress()interface{}
+}
 func (mw *MonitoredWorker) wgoroute() {
 	mw.wgrun.Add(1)
 	mw.state = Running
@@ -47,9 +48,7 @@ func (mw *MonitoredWorker) wgoroute() {
 			}
 		default:
 			{
-				var isdone bool
-				var err error
-				mw.from, mw.to, isdone, err = mw.Func(mw.from, mw.to)
+				isdone, err := mw.Itw.DoWork()
 				if err != nil {
 					log.Println("error: work failed")
 					mw.state = Failed
@@ -65,7 +64,6 @@ func (mw *MonitoredWorker) wgoroute() {
 			}
 
 		}
-		time.Sleep(time.Millisecond * 300)
 	}
 }
 func (mw MonitoredWorker) GetState() int {
@@ -75,15 +73,13 @@ func (mw MonitoredWorker) GetId() string {
 	return mw.guid
 
 }
-func (mw *MonitoredWorker) Start(from interface{}, to interface{}, prm ...interface{}) (string, error) {
+func (mw *MonitoredWorker) Start() (string, error) {
 	mw.wgrun.Wait()
 	if mw.state == Running {
 		return "", errors.New("error: try start runing job")
 	}
 	mw.guid = genUid()
 	mw.chsig = make(chan int, 1)
-	mw.from = from
-	mw.to = to
 	go mw.wgoroute()
 	return "guid", nil
 }
@@ -97,7 +93,7 @@ func (mw *MonitoredWorker) Stop() error {
 	return nil
 
 }
-func (mw MonitoredWorker) GetResult() (interface{}, interface{}) {
-	return mw.from, mw.to
+func (mw MonitoredWorker) GetResult() (interface{}) {
+	return mw.Itw.GetProgress()
 
 }
