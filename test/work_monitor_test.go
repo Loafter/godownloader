@@ -8,7 +8,7 @@ import (
 )
 
 type TestWork struct {
-	From, To int
+	From, sleep, To int
 }
 
 func (tw TestWork) GetProgress() interface{} {
@@ -16,7 +16,7 @@ func (tw TestWork) GetProgress() interface{} {
 
 }
 func (tw *TestWork) DoWork() (bool, error) {
-	time.Sleep(time.Millisecond * 300)
+	time.Sleep(time.Millisecond * tw.sleep)
 	tw.From += 1
 	if tw.From > tw.To {
 		return false, errors.New("failed")
@@ -29,7 +29,7 @@ func (tw *TestWork) DoWork() (bool, error) {
 
 func TestWorker(t *testing.T) {
 	tes := new(monitor.MonitoredWorker)
-	itw := &TestWork{From: 1, To: 8}
+	itw := &TestWork{From: 1, To: 8, sleep: 300}
 	tes.Itw = itw
 	tes.Start()
 	time.Sleep(time.Second * 1)

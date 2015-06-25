@@ -94,7 +94,7 @@ func (mw *MonitoredWorker) Stop() error {
 	return nil
 
 }
-func (mw MonitoredWorker) GetResult() interface{} {
+func (mw MonitoredWorker) GetProgress() interface{} {
 	return mw.Itw.GetProgress()
 
 }
