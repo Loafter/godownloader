@@ -5,6 +5,7 @@ import "testing"
 import (
 	"errors"
 	"time"
+	"log"
 )
 
 type TestWork struct {
@@ -16,12 +17,13 @@ func (tw TestWork) GetProgress() interface{} {
 
 }
 func (tw *TestWork) DoWork() (bool, error) {
-	time.Sleep(time.Millisecond * tw.sleep)
+	time.Sleep(time.Millisecond*300)
 	tw.From += 1
 	if tw.From > tw.To {
 		return false, errors.New("failed")
 	}
 	if tw.From == tw.To {
+		log.Println("done")
 		return true, nil
 	}
 	return false, nil

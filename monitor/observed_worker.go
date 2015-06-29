@@ -82,7 +82,7 @@ func (mw *MonitoredWorker) Start() (string, error) {
 	mw.guid = genUid()
 	mw.chsig = make(chan int, 1)
 	go mw.wgoroute()
-	return "guid", nil
+	return mw.guid, nil
 }
 
 func (mw *MonitoredWorker) Stop() error {
