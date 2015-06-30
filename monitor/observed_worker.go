@@ -71,18 +71,20 @@ func (mw MonitoredWorker) GetState() int {
 	return mw.state
 }
 func (mw MonitoredWorker) GetId() string {
+	if len(mw.guid)==0{
+		mw.guid = genUid()
+	}
 	return mw.guid
 
 }
-func (mw *MonitoredWorker) Start() (string, error) {
+func (mw *MonitoredWorker) Start() error {
 	mw.wgrun.Wait()
 	if mw.state == Running {
-		return "", errors.New("error: try start runing job")
+		return errors.New("error: try start runing job")
 	}
-	mw.guid = genUid()
 	mw.chsig = make(chan int, 1)
 	go mw.wgoroute()
-	return mw.guid, nil
+	return nil
 }
 
 func (mw *MonitoredWorker) Stop() error {
@@ -94,7 +96,7 @@ func (mw *MonitoredWorker) Stop() error {
 	return nil
 
 }
-func (mw MonitoredWorker) GetProgress() interface{} {
+func (mw MonitoredWorker) GetProgress()interface{} {
 	return mw.Itw.GetProgress()
 
 }
