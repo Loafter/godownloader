@@ -1,19 +1,20 @@
 package monitor
-import "log"
+import (
+	"log"
+)
 
 type WorkerPool struct {
-	dwks map[string]MonitoredWorker
+	dwks map[string]*MonitoredWorker
 }
 func (wp *WorkerPool) Init(){
-	wp.dwks=make(map[string]MonitoredWorker)
+	wp.dwks=make(map[string]*MonitoredWorker)
 }
-func (wp *WorkerPool)AppendWork(iv MonitoredWorker) {
+func (wp *WorkerPool)AppendWork(iv *MonitoredWorker) {
 	wp.dwks[iv.GetId()]=iv
 }
 func (wp *WorkerPool)StartAll() {
-	for key, value := range wp.dwks {
-		status:=value.Start()
-		log.Println("info: job guid ",key," status ",status)
+	for _, value := range wp.dwks {
+		value.Start()
 	}
 }
 

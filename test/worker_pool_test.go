@@ -4,13 +4,14 @@ import (
 	"testing"
 	"godownloader/monitor"
 	"time"
-	"math/rand"
 	"errors"
+	"fmt"
+	"math/rand"
 	"log"
 )
 
 type TestWorkPool struct {
-	From, sleep, To int32
+	From, id, To int32
 }
 
 func (tw TestWorkPool) GetProgress() interface{} {
@@ -20,38 +21,36 @@ func (tw TestWorkPool) GetProgress() interface{} {
 func (tw *TestWorkPool) DoWork() (bool, error) {
 	time.Sleep(time.Millisecond*300)
 	tw.From += 1
-	if tw.From > tw.To {
-		return false, errors.New("failed")
-	}
+	log.Print(tw.From)
 	if tw.From == tw.To {
-		log.Println("done")
+		fmt.Println("done")
 		return true, nil
+	}
+	if tw.From > tw.To {
+		return false, errors.New("tw.From > tw.To")
 	}
 	return false, nil
 }
-
-
 func TestWorkerPool(t *testing.T) {
 	wp := monitor.WorkerPool{}
 	wp.Init()
 	for i := 0; i < 20; i++ {
-		w :=TestWorkPool{From: rand.Int31n(5), To: 5 + rand.Int31n(26), sleep: 300 + rand.Int31n(1000)}
-		mw:=monitor.MonitoredWorker{Itw:&w}
+		mw := &monitor.MonitoredWorker{Itw:&TestWorkPool{From:0, To:20, id:rand.Int31()}}
 		wp.AppendWork(mw)
 	}
-	//test normal work
 	wp.StartAll()
 	time.Sleep(time.Second)
-	wp.GetAllProgress()
+	log.Println("------------------Work Started------------------")
+	log.Println(wp.GetAllProgress())
+	log.Println("------------------Get All Progress--------------")
 	time.Sleep(time.Second)
 	wp.StopAll()
+	log.Println("------------------Work Stop-------------------")
 
+	time.Sleep(time.Second)
 	wp.StartAll()
-	//start running work
+	time.Sleep(time.Second*5)
+	wp.StopAll()
 	wp.StartAll()
-
 	wp.StopAll()
-	//stop stopped work
-	wp.StopAll()
-
 }

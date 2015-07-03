@@ -3,9 +3,9 @@ package monitor
 import (
 	"crypto/rand"
 	"errors"
-	"fmt"
 	"log"
 	"sync"
+	"fmt"
 )
 
 const (
@@ -36,7 +36,13 @@ type IterationWork interface {
 }
 
 func (mw *MonitoredWorker) wgoroute() {
+	log.Println("info: work start",mw.GetId())
 	mw.wgrun.Add(1)
+	defer func() {
+		log.Print("info: realease work guid",mw.GetId())
+		mw.wgrun.Done()
+	} ()
+
 	mw.state = Running
 	for {
 		select {
@@ -44,21 +50,18 @@ func (mw *MonitoredWorker) wgoroute() {
 			if newState == Stopped {
 				mw.state = newState
 				log.Println("info: work stopped")
-				mw.wgrun.Done()
 				return
 			}
 		default:
 			{
 				isdone, err := mw.Itw.DoWork()
 				if err != nil {
-					log.Println("error: work failed")
+					log.Println("error: guid", mw.guid, " work failed", err)
 					mw.state = Failed
-					mw.wgrun.Done()
 					return
 				}
 				if isdone {
 					mw.state = Completed
-					mw.wgrun.Done()
 					log.Println("info: work done")
 					return
 				}
@@ -70,17 +73,16 @@ func (mw *MonitoredWorker) wgoroute() {
 func (mw MonitoredWorker) GetState() int {
 	return mw.state
 }
-func (mw MonitoredWorker) GetId() string {
-	if len(mw.guid)==0{
+func (mw *MonitoredWorker) GetId() string {
+	if len(mw.guid)==0 {
 		mw.guid = genUid()
 	}
 	return mw.guid
 
 }
 func (mw *MonitoredWorker) Start() error {
-	mw.wgrun.Wait()
 	if mw.state == Running {
-		return errors.New("error: try start runing job")
+		errors.New("error: try run runing job")
 	}
 	mw.chsig = make(chan int, 1)
 	go mw.wgoroute()
@@ -89,14 +91,15 @@ func (mw *MonitoredWorker) Start() error {
 
 func (mw *MonitoredWorker) Stop() error {
 	if mw.state == Stopped {
-		return errors.New("error: can't stop stoped work")
+		panic("imposible start runing job")
 	}
 	mw.chsig <- Stopped
 	mw.wgrun.Wait()
+	close(mw.chsig)
 	return nil
 
 }
-func (mw MonitoredWorker) GetProgress()interface{} {
+func (mw MonitoredWorker) GetProgress() interface{} {
 	return mw.Itw.GetProgress()
 
 }
