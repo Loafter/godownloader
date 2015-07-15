@@ -32,7 +32,6 @@ func (tw *TestWorkPool) DoWork() (bool, error) {
 	return false, nil
 }
 func TestWorkerPool(t *testing.T) {
-	return
 	wp := monitor.WorkerPool{}
 	wp.Init()
 	for i := 0; i < 20; i++ {

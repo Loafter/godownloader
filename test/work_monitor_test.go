@@ -30,7 +30,6 @@ func (tw *TestWork) DoWork() (bool, error) {
 }
 
 func TestWorker(t *testing.T) {
-	return
 	tes := new(monitor.MonitoredWorker)
 	itw := &TestWork{From: 1, To: 8, sleep: 300}
 	tes.Itw = itw

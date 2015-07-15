@@ -16,7 +16,7 @@ func GetSize(urls string) (int64, error) {
 		return 0,err
 	}
 	if resp.StatusCode!=200{
-		log.Printf("error: file not found or moved status:",resp.Status)
+		log.Printf("error: file not found or moved status:",resp.StatusCode)
 		return 0,errors.New("error: file not found or moved")
 	}
 	log.Printf("info: file size is %d bytes \n",resp.ContentLength)
