@@ -36,12 +36,12 @@ type IterationWork interface {
 }
 
 func (mw *MonitoredWorker) wgoroute() {
-	log.Println("info: work start",mw.GetId())
+	log.Println("info: work start", mw.GetId())
 	mw.wgrun.Add(1)
 	defer func() {
-		log.Print("info: realease work guid",mw.GetId())
+		log.Print("info: realease work guid", mw.GetId())
 		mw.wgrun.Done()
-	} ()
+	}()
 
 	mw.state = Running
 	for {

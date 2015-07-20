@@ -6,7 +6,7 @@ import (
 type WorkerPool struct {
 	dwks map[string]*MonitoredWorker
 }
-func (wp *WorkerPool) Init(){
+func (wp *WorkerPool) Init() {
 	wp.dwks=make(map[string]*MonitoredWorker)
 }
 func (wp *WorkerPool)AppendWork(iv *MonitoredWorker) {
@@ -24,10 +24,10 @@ func (wp *WorkerPool)StopAll() {
 	}
 }
 
-func (wp *WorkerPool)GetAllProgress()[]interface{} {
-	rs:=make([]interface{},1)
+func (wp *WorkerPool)GetAllProgress() []interface{} {
+	rs := make([]interface{}, 1)
 	for _, value := range wp.dwks {
-		rs=append(rs,value.GetProgress())
+		rs=append(rs, value.GetProgress())
 	}
 	return rs
 }
