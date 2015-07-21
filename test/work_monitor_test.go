@@ -14,7 +14,6 @@ type TestWork struct {
 
 func (tw TestWork) GetProgress() interface{} {
 	return tw.From
-
 }
 func (tw *TestWork) DoWork() (bool, error) {
 	time.Sleep(time.Millisecond*300)

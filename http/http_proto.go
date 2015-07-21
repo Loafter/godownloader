@@ -12,7 +12,7 @@ func CheckMultipart(urls string) (bool, error) {
 	}
 	r.Header.Add("Range", "bytes=0-0")
 	cl := http.Client{}
-	f,_:=os.Create("/home/andrew/Desktop/dum.txt")
+	f, _ := os.Create("/home/andrew/Desktop/dum.txt")
 	r.Write(f)
 	defer f.Close()
 	resp, err := cl.Do(r)
@@ -20,7 +20,7 @@ func CheckMultipart(urls string) (bool, error) {
 		log.Printf("error: can't check multipart support assume no %v \n", err)
 		return false, err
 	}
-	f1,_:=os.Create("/home/andrew/Desktop/res.txt")
+	f1, _ := os.Create("/home/andrew/Desktop/res.txt")
 	resp.Write(f1)
 	if resp.StatusCode!=206 {
 		return false, errors.New("error: file not found or moved status: "+ resp.Status)
@@ -45,4 +45,33 @@ func GetSize(urls string) (int64, error) {
 	}
 	log.Printf("info: file size is %d bytes \n", resp.ContentLength)
 	return resp.ContentLength, nil
+}
+
+type PartialDownloader struct {
+	from int64
+	to   int64
+	pos  int64
+	rch  bool
+	url  string
+}
+func (pd *PartialDownloader) Init(url string, from int64, pos int64, to int64) {
+	pd.from=from
+	pd.to=to
+	pd.pos=pos
+}
+func (pd PartialDownloader) GetProgress() interface{} {
+	return pd.from//, pd.to, pd.to
+}
+func (pd *PartialDownloader) DoWork() (bool, error) {
+	//in last time we check resume support
+	if !pd.rch {
+		if nos, err := CheckMultipart(pd.url); nos {
+			return false, err
+		}
+	}
+	//assume resume support
+	pd.rch=true
+	//do download
+
+	return true, nil
 }
