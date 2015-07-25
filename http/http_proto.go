@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 )
+const MaxDownloadPortion=4096
 func CheckMultipart(urls string) (bool, error) {
 	r, err := http.NewRequest("GET", urls, nil)
 	if err!=nil {
@@ -12,9 +13,6 @@ func CheckMultipart(urls string) (bool, error) {
 	}
 	r.Header.Add("Range", "bytes=0-0")
 	cl := http.Client{}
-	f, _ := os.Create("/home/andrew/Desktop/dum.txt")
-	r.Write(f)
-	defer f.Close()
 	resp, err := cl.Do(r)
 	if err!=nil {
 		log.Printf("error: can't check multipart support assume no %v \n", err)
@@ -47,20 +45,33 @@ func GetSize(urls string) (int64, error) {
 	return resp.ContentLength, nil
 }
 
-type PartialDownloader struct {
+type DownloadProgress struct{
 	from int64
 	to   int64
 	pos  int64
+}
+type PartialDownloader struct {
+	dp DownloadProgress
+	cli *http.Client
 	rch  bool
 	url  string
 }
 func (pd *PartialDownloader) Init(url string, from int64, pos int64, to int64) {
-	pd.from=from
-	pd.to=to
-	pd.pos=pos
+	pd.dp.from=from
+	pd.dp.to=to
+	pd.dp.pos=pos
 }
-func (pd PartialDownloader) GetProgress() interface{} {
-	return pd.from//, pd.to, pd.to
+
+func (pd PartialDownloader) GetProgress()DownloadProgress{
+	return pd.dp
+}
+func constuctReqH(current int64,to int64)string{
+	if to<current+MaxDownloadPortion{
+		return "bytes="+current+"-"+to
+	}
+
+	return "bytes="+current+"-"+MaxDownloadPortion
+
 }
 func (pd *PartialDownloader) DoWork() (bool, error) {
 	//in last time we check resume support
@@ -73,5 +84,33 @@ func (pd *PartialDownloader) DoWork() (bool, error) {
 	pd.rch=true
 	//do download
 
+	//check if our client is not created
+	if pd.cli==nil{
+		pd.cli=new(http.Client)
+	}
+	//create new req
+	r, err := http.NewRequest("GET", pd.url, nil)
+	//ok we construct query
+	r.Header.Add("Range", constuctReqH(pd.dp.pos,pd.dp.to))
+	if err!=nil {
+		return false, err
+	}
+	//try send
+	resp, err := pd.cli.Do(r)
+	if err!=nil {
+		log.Printf("error: error download part  file%v \n", err)
+		return false, err
+	}
+	//check response
+	if resp.StatusCode!=200 {
+		log.Printf("error: file not found or moved status:", resp.StatusCode)
+		return false, errors.New("error: file not found or moved")
+	}
+	pd.dp.pos+pd.dp.pos+MaxDownloadPortion
+	if(pd.dp.pos==pd.dp.to){
+		//ok download part complete normal
+		return false,nil
+	}
+	//not full download try next segment
 	return true, nil
 }
