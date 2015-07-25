@@ -73,7 +73,7 @@ func constuctReqH(current int64,to int64)string{
 	return "bytes="+current+"-"+MaxDownloadPortion
 
 }
-func (pd *PartialDownloader) DoWork() (bool, error) {
+func(pd *PartialDownloader)DownloadSergment()(bool,error){
 	//in last time we check resume support
 	if !pd.rch {
 		if nos, err := CheckMultipart(pd.url); nos {
@@ -113,4 +113,7 @@ func (pd *PartialDownloader) DoWork() (bool, error) {
 	}
 	//not full download try next segment
 	return true, nil
+}
+func (pd *PartialDownloader) DoWork() (bool, error) {
+ return  pd.DownloadSergment()
 }
