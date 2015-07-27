@@ -3,7 +3,9 @@ import (
 	"net/http"
 	"log"
 	"errors"
+	"strconv"
 	"os"
+	"io/ioutil"
 )
 const MaxDownloadPortion=4096
 func CheckMultipart(urls string) (bool, error) {
@@ -18,8 +20,6 @@ func CheckMultipart(urls string) (bool, error) {
 		log.Printf("error: can't check multipart support assume no %v \n", err)
 		return false, err
 	}
-	f1, _ := os.Create("/home/andrew/Desktop/res.txt")
-	resp.Write(f1)
 	if resp.StatusCode!=206 {
 		return false, errors.New("error: file not found or moved status: "+ resp.Status)
 	}
@@ -52,11 +52,14 @@ type DownloadProgress struct{
 }
 type PartialDownloader struct {
 	dp DownloadProgress
-	cli *http.Client
-	rch  bool
+	client *http.Client
+	isresume bool
 	url  string
+	file *os.File
 }
-func (pd *PartialDownloader) Init(url string, from int64, pos int64, to int64) {
+func (pd *PartialDownloader) Init(url string,file  *os.File ,from int64, pos int64, to int64) {
+	pd.file=file
+	pd.url=url
 	pd.dp.from=from
 	pd.dp.to=to
 	pd.dp.pos=pos
@@ -67,51 +70,64 @@ func (pd PartialDownloader) GetProgress()DownloadProgress{
 }
 func constuctReqH(current int64,to int64)string{
 	if to<current+MaxDownloadPortion{
-		return "bytes="+current+"-"+to
+		return "bytes="+strconv.FormatInt(current,10)+"-"+strconv.FormatInt(to,10)
 	}
 
-	return "bytes="+current+"-"+MaxDownloadPortion
+	return "bytes="+ strconv.FormatInt(current,10)+"-"+strconv.FormatInt(current+MaxDownloadPortion,10)
 
 }
 func(pd *PartialDownloader)DownloadSergment()(bool,error){
 	//in last time we check resume support
-	if !pd.rch {
-		if nos, err := CheckMultipart(pd.url); nos {
+	if !pd.isresume {
+		if nos, err := CheckMultipart(pd.url); !nos {
 			return false, err
 		}
 	}
 	//assume resume support
-	pd.rch=true
+	pd.isresume=true
 	//do download
 
 	//check if our client is not created
-	if pd.cli==nil{
-		pd.cli=new(http.Client)
+	if pd.client==nil{
+		pd.client=new(http.Client)
 	}
 	//create new req
 	r, err := http.NewRequest("GET", pd.url, nil)
 	//ok we construct query
 	r.Header.Add("Range", constuctReqH(pd.dp.pos,pd.dp.to))
+	a,_:=os.Create("req.txt")
+	r.Write(a)
+	a.Close()
 	if err!=nil {
 		return false, err
 	}
-	//try send
-	resp, err := pd.cli.Do(r)
+	//try send request
+	resp, err := pd.client.Do(r)
 	if err!=nil {
-		log.Printf("error: error download part  file%v \n", err)
+		log.Printf("error: error download part file%v \n", err)
 		return false, err
 	}
 	//check response
-	if resp.StatusCode!=200 {
+	if resp.StatusCode!=206 {
 		log.Printf("error: file not found or moved status:", resp.StatusCode)
 		return false, errors.New("error: file not found or moved")
 	}
-	pd.dp.pos+pd.dp.pos+MaxDownloadPortion
+	//write flush data to disk
+	dat,err:=ioutil.ReadAll(resp.Body)
+	if (err!=nil){
+		return false,err
+	}
+	c,err:=pd.file.WriteAt(dat,pd.dp.pos)
+	if err!=nil{
+		return false,err
+	}
+	pd.file.Sync()
+	pd.dp.pos=pd.dp.pos+int64(c)
 	if(pd.dp.pos==pd.dp.to){
 		//ok download part complete normal
 		return false,nil
 	}
-	//not full download try next segment
+	//not full download next segment
 	return true, nil
 }
 func (pd *PartialDownloader) DoWork() (bool, error) {
