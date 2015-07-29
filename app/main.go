@@ -16,8 +16,6 @@ func WriteTo(f *os.File,d []byte,syn *sync.WaitGroup){
 		log.Println(err)
 		return
 	}
-
-
 }
 func main() {
 	runtime.GOMAXPROCS(8)

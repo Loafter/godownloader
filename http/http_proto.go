@@ -5,9 +5,8 @@ import (
 	"errors"
 	"strconv"
 	"os"
-	"io/ioutil"
 )
-const MaxDownloadPortion=4096
+const FlushDiskSize = 1024*1024
 func CheckMultipart(urls string) (bool, error) {
 	r, err := http.NewRequest("GET", urls, nil)
 	if err!=nil {
@@ -45,19 +44,19 @@ func GetSize(urls string) (int64, error) {
 	return resp.ContentLength, nil
 }
 
-type DownloadProgress struct{
+type DownloadProgress struct {
 	from int64
 	to   int64
 	pos  int64
 }
 type PartialDownloader struct {
-	dp DownloadProgress
-	client *http.Client
-	isresume bool
-	url  string
-	file *os.File
+	dp     DownloadProgress
+	client http.Client
+	req    *http.Response
+	url    string
+	file   *os.File
 }
-func (pd *PartialDownloader) Init(url string,file  *os.File ,from int64, pos int64, to int64) {
+func (pd *PartialDownloader) Init(url string, file  *os.File, from int64, pos int64, to int64) {
 	pd.file=file
 	pd.url=url
 	pd.dp.from=from
@@ -65,71 +64,64 @@ func (pd *PartialDownloader) Init(url string,file  *os.File ,from int64, pos int
 	pd.dp.pos=pos
 }
 
-func (pd PartialDownloader) GetProgress()DownloadProgress{
+func (pd PartialDownloader) GetProgress() DownloadProgress {
 	return pd.dp
 }
-func constuctReqH(current int64,to int64)string{
-	if to<current+MaxDownloadPortion{
-		return "bytes="+strconv.FormatInt(current,10)+"-"+strconv.FormatInt(to,10)
+
+func (pd *PartialDownloader)BeforeRun() error {
+	nos, err := CheckMultipart(pd.url)
+	if !nos {
+		return errors.New("error: server unsupport part support")
 	}
-
-	return "bytes="+ strconv.FormatInt(current,10)+"-"+strconv.FormatInt(current+MaxDownloadPortion,10)
-
-}
-func(pd *PartialDownloader)DownloadSergment()(bool,error){
-	//in last time we check resume support
-	if !pd.isresume {
-		if nos, err := CheckMultipart(pd.url); !nos {
-			return false, err
-		}
-	}
-	//assume resume support
-	pd.isresume=true
-	//do download
-
-	//check if our client is not created
-	if pd.client==nil{
-		pd.client=new(http.Client)
+	if err!=nil {
+		return err
 	}
 	//create new req
 	r, err := http.NewRequest("GET", pd.url, nil)
-	//ok we construct query
-	r.Header.Add("Range", constuctReqH(pd.dp.pos,pd.dp.to))
-	a,_:=os.Create("req.txt")
-	r.Write(a)
-	a.Close()
 	if err!=nil {
-		return false, err
+		return err
 	}
+	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.from, 10)+"-"+strconv.FormatInt(pd.dp.to, 10))
+	//ok we construct query
 	//try send request
 	resp, err := pd.client.Do(r)
 	if err!=nil {
 		log.Printf("error: error download part file%v \n", err)
-		return false, err
+		return err
 	}
 	//check response
 	if resp.StatusCode!=206 {
 		log.Printf("error: file not found or moved status:", resp.StatusCode)
-		return false, errors.New("error: file not found or moved")
+		return errors.New("error: file not found or moved")
 	}
+	pd.req=resp
+	return nil
+}
+func (pd *PartialDownloader)AfterStop() error {
+	return nil
+}
+func (pd *PartialDownloader)DownloadSergment() (bool, error) {
 	//write flush data to disk
-	dat,err:=ioutil.ReadAll(resp.Body)
-	if (err!=nil){
-		return false,err
+	 buffer:=make([]byte, FlushDiskSize, FlushDiskSize)
+	count,err:= pd.req.Body.Read(buffer)
+	if (err!=nil) {
+		pd.file.Sync()
+		return false, err
 	}
-	c,err:=pd.file.WriteAt(dat,pd.dp.pos)
-	if err!=nil{
-		return false,err
+	realc, err := pd.file.WriteAt(buffer[:count], pd.dp.pos)
+	if err!=nil {
+		return false, err
 	}
-	pd.file.Sync()
-	pd.dp.pos=pd.dp.pos+int64(c)
-	if(pd.dp.pos==pd.dp.to){
+
+	pd.dp.pos=pd.dp.pos+int64(realc)
+	if (pd.dp.pos==pd.dp.to) {
 		//ok download part complete normal
-		return false,nil
+		pd.file.Sync()
+		return false, nil
 	}
 	//not full download next segment
 	return true, nil
 }
 func (pd *PartialDownloader) DoWork() (bool, error) {
- return  pd.DownloadSergment()
+	return pd.DownloadSergment()
 }

@@ -18,6 +18,18 @@ func (tw TestWorkPool) GetProgress() interface{} {
 	return tw.From
 
 }
+
+
+func (tw *TestWorkPool)BeforeRun()error{
+	log.Println("info: exec before run")
+	return nil
+}
+func (tw *TestWorkPool)AfterStop()error{
+	log.Println("info: after stop")
+	return nil
+}
+
+
 func (tw *TestWorkPool) DoWork() (bool, error) {
 	time.Sleep(time.Millisecond*300)
 	tw.From += 1

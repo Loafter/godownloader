@@ -36,7 +36,7 @@ func TestGetSize(t *testing.T) {
 }
 
 func TestPartDownload(t *testing.T) {
-	c, e := httpclient.GetSize("http://s0.cyberciti.org/images/misc/static/2012/11/ifdata-welcome-0.png")
+	c, e := httpclient.GetSize("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso")
 	if (e!=nil) {
 		t.Error("failed: Get size must be without error")
 	}
@@ -45,7 +45,8 @@ func TestPartDownload(t *testing.T) {
 	f.Truncate(c);
 
 	dow:=httpclient.PartialDownloader{}
-	dow.Init("http://s0.cyberciti.org/images/misc/static/2012/11/ifdata-welcome-0.png",f,0,0,c)
+	dow.Init("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso",f,0,0,c)
+	dow.BeforeRun()
 	for  {
 		sta,_:=dow.DoWork()
 		if !sta{

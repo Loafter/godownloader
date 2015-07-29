@@ -33,6 +33,9 @@ type MonitoredWorker struct {
 type IterationWork interface {
 	DoWork() (bool, error)
 	GetProgress() interface{}
+	BeforeRun()error
+	AfterStop()error
+
 }
 
 func (mw *MonitoredWorker) wgoroute() {
@@ -84,6 +87,10 @@ func (mw *MonitoredWorker) Start() error {
 	if mw.state == Running {
 		errors.New("error: try run runing job")
 	}
+	if err:=mw.Itw.BeforeRun();err!=nil{
+		return err
+	}
+
 	mw.chsig = make(chan int, 1)
 	go mw.wgoroute()
 	return nil
@@ -96,6 +103,9 @@ func (mw *MonitoredWorker) Stop() error {
 	mw.chsig <- Stopped
 	mw.wgrun.Wait()
 	close(mw.chsig)
+	if err:=mw.Itw.AfterStop();err!=nil{
+		return err
+	}
 	return nil
 
 }

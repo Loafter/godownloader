@@ -28,6 +28,15 @@ func (tw *TestWork) DoWork() (bool, error) {
 	return false, nil
 }
 
+func (tw *TestWork)BeforeRun()error{
+	log.Println("info: exec before run")
+	return nil
+}
+func (tw *TestWork)AfterStop()error{
+	log.Println("info: exec after stop")
+	return nil
+}
+
 func TestWorker(t *testing.T) {
 	tes := new(monitor.MonitoredWorker)
 	itw := &TestWork{From: 1, To: 8, sleep: 300}
