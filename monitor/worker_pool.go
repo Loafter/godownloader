@@ -6,13 +6,12 @@ import (
 type WorkerPool struct {
 	workers map[string]*MonitoredWorker
 }
-func (wp *WorkerPool) Init() {
-	wp.workers=make(map[string]*MonitoredWorker)
-}
 func (wp *WorkerPool)AppendWork(iv *MonitoredWorker) {
+
 	wp.workers[iv.GetId()]=iv
 }
 func (wp *WorkerPool)StartAll() {
+
 	for _, value := range wp.workers {
 		value.Start()
 	}

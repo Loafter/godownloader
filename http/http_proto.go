@@ -64,11 +64,11 @@ func (pd *PartialDownloader) Init(url string, file  *os.File, from int64, pos in
 	pd.dp.pos=pos
 }
 
-func (pd PartialDownloader) GetProgress() DownloadProgress {
+func (pd PartialDownloader) GetProgress() interface{} {
 	return pd.dp
 }
 
-func (pd *PartialDownloader)BeforeRun() error {
+func (pd *PartialDownloader)BeforeDownload() error {
 	nos, err := CheckMultipart(pd.url)
 	if !nos {
 		return errors.New("error: server unsupport part support")
@@ -97,30 +97,44 @@ func (pd *PartialDownloader)BeforeRun() error {
 	pd.req=resp
 	return nil
 }
-func (pd *PartialDownloader)AfterStop() error {
-	return nil
+func (pd *PartialDownloader)AfterStopDownload() error {
+	log.Println(pd.req.Body.Close())
+	return pd.file.Sync()
 }
+func (pd *PartialDownloader)BeforeRun() error {
+	log.Println("info: before run")
+	return pd.BeforeDownload()
+}
+func (pd *PartialDownloader)AfterStop() error {
+	return pd.AfterStopDownload()
+}
+
+
 func (pd *PartialDownloader)DownloadSergment() (bool, error) {
 	//write flush data to disk
-	 buffer:=make([]byte, FlushDiskSize, FlushDiskSize)
-	count,err:= pd.req.Body.Read(buffer)
+	buffer := make([]byte, FlushDiskSize, FlushDiskSize)
+	count, err := pd.req.Body.Read(buffer)
 	if (err!=nil) {
+		pd.req.Body.Close()
 		pd.file.Sync()
-		return false, err
+		return true, err
 	}
 	realc, err := pd.file.WriteAt(buffer[:count], pd.dp.pos)
 	if err!=nil {
-		return false, err
+		pd.file.Sync()
+		pd.req.Body.Close()
+		return true, err
 	}
 
 	pd.dp.pos=pd.dp.pos+int64(realc)
 	if (pd.dp.pos==pd.dp.to) {
 		//ok download part complete normal
 		pd.file.Sync()
-		return false, nil
+		pd.req.Body.Close()
+		return true, nil
 	}
 	//not full download next segment
-	return true, nil
+	return false, nil
 }
 func (pd *PartialDownloader) DoWork() (bool, error) {
 	return pd.DownloadSergment()

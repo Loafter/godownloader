@@ -45,7 +45,6 @@ func (tw *TestWorkPool) DoWork() (bool, error) {
 }
 func TestWorkerPool(t *testing.T) {
 	wp := monitor.WorkerPool{}
-	wp.Init()
 	for i := 0; i < 20; i++ {
 		mw := &monitor.MonitoredWorker{Itw:&TestWorkPool{From:0, To:20, id:rand.Int31()}}
 		wp.AppendWork(mw)
