@@ -3,9 +3,9 @@ package monitor
 import (
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"log"
 	"sync"
-	"fmt"
 )
 
 const (
@@ -22,7 +22,7 @@ func genUid() string {
 }
 
 type MonitoredWorker struct {
-	lc sync.Mutex
+	lc    sync.Mutex
 	Itw   IterationWork
 	wgrun sync.WaitGroup
 	guid  string
@@ -34,9 +34,8 @@ type MonitoredWorker struct {
 type IterationWork interface {
 	DoWork() (bool, error)
 	GetProgress() interface{}
-	BeforeRun()error
-	AfterStop()error
-
+	BeforeRun() error
+	AfterStop() error
 }
 
 func (mw *MonitoredWorker) wgoroute() {
@@ -77,7 +76,7 @@ func (mw MonitoredWorker) GetState() int {
 	return mw.state
 }
 func (mw *MonitoredWorker) GetId() string {
-	if len(mw.guid)==0 {
+	if len(mw.guid) == 0 {
 		mw.guid = genUid()
 	}
 	return mw.guid
@@ -87,14 +86,16 @@ func (mw *MonitoredWorker) Start() error {
 	mw.lc.Lock()
 	defer mw.lc.Unlock()
 	if mw.state == Running {
-		errors.New("error: try run runing job")
+		return errors.New("error: try run runing job")
 	}
-	if err:=mw.Itw.BeforeRun();err!=nil{
+	if err := mw.Itw.BeforeRun(); err != nil {
 		return err
 	}
-	mw.state = Running
+
 	mw.chsig = make(chan int, 1)
+	mw.state = Running
 	go mw.wgoroute()
+
 	return nil
 }
 
@@ -107,7 +108,7 @@ func (mw *MonitoredWorker) Stop() error {
 	mw.chsig <- Stopped
 	mw.wgrun.Wait()
 	close(mw.chsig)
-	if err:=mw.Itw.AfterStop();err!=nil{
+	if err := mw.Itw.AfterStop(); err != nil {
 		return err
 	}
 	return nil

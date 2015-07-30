@@ -4,8 +4,8 @@ import "godownloader/monitor"
 import "testing"
 import (
 	"errors"
-	"time"
 	"log"
+	"time"
 )
 
 type TestWork struct {
@@ -16,7 +16,7 @@ func (tw TestWork) GetProgress() interface{} {
 	return tw.From
 }
 func (tw *TestWork) DoWork() (bool, error) {
-	time.Sleep(time.Millisecond*300)
+	time.Sleep(time.Millisecond * 300)
 	tw.From += 1
 	if tw.From > tw.To {
 		return false, errors.New("failed")
@@ -28,11 +28,11 @@ func (tw *TestWork) DoWork() (bool, error) {
 	return false, nil
 }
 
-func (tw *TestWork)BeforeRun()error{
+func (tw *TestWork) BeforeRun() error {
 	log.Println("info: exec before run")
 	return nil
 }
-func (tw *TestWork)AfterStop()error{
+func (tw *TestWork) AfterStop() error {
 	log.Println("info: exec after stop")
 	return nil
 }
@@ -42,6 +42,7 @@ func TestWorker(t *testing.T) {
 	itw := &TestWork{From: 1, To: 8, sleep: 300}
 	tes.Itw = itw
 	tes.Start()
+	log.Println(tes.Start())
 	time.Sleep(time.Second * 1)
 	if tes.GetState() != 1 {
 		t.Error("Expected Running(1)")
