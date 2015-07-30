@@ -7,7 +7,9 @@ type WorkerPool struct {
 	workers map[string]*MonitoredWorker
 }
 func (wp *WorkerPool)AppendWork(iv *MonitoredWorker) {
-
+	if wp.workers==nil{
+		wp.workers=make(map[string]*MonitoredWorker)
+	}
 	wp.workers[iv.GetId()]=iv
 }
 func (wp *WorkerPool)StartAll() {

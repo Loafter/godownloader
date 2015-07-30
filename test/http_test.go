@@ -4,7 +4,6 @@ import (
 	"testing"
 	"godownloader/http"
 	"os"
-	"log"
 )
 
 func TestMultiThreadSuppurt(t *testing.T) {
@@ -42,14 +41,13 @@ func TestPartDownload(t *testing.T) {
 	defer f.Close()
 	f.Truncate(c);
 	dow:=httpclient.PartialDownloader{}
-	dow.Init("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso",f,0,0,c)
+	dow.Init("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso",f,0,c)
 	dow.BeforeRun()
 	for  {
 		sta,_:=dow.DoWork()
 		if sta{
 			return
 		}
-		log.Print(dow.GetProgress())
 	}
 
 }

@@ -22,6 +22,7 @@ func genUid() string {
 }
 
 type MonitoredWorker struct {
+	lc sync.Mutex
 	Itw   IterationWork
 	wgrun sync.WaitGroup
 	guid  string
@@ -46,7 +47,6 @@ func (mw *MonitoredWorker) wgoroute() {
 		mw.wgrun.Done()
 	}()
 
-	mw.state = Running
 	for {
 		select {
 		case newState := <-mw.chsig:
@@ -84,19 +84,23 @@ func (mw *MonitoredWorker) GetId() string {
 
 }
 func (mw *MonitoredWorker) Start() error {
+	mw.lc.Lock()
+	defer mw.lc.Unlock()
 	if mw.state == Running {
 		errors.New("error: try run runing job")
 	}
 	if err:=mw.Itw.BeforeRun();err!=nil{
 		return err
 	}
-
+	mw.state = Running
 	mw.chsig = make(chan int, 1)
 	go mw.wgoroute()
 	return nil
 }
 
 func (mw *MonitoredWorker) Stop() error {
+	mw.lc.Lock()
+	defer mw.lc.Unlock()
 	if mw.state == Stopped {
 		panic("imposible start runing job")
 	}

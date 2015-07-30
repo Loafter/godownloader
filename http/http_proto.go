@@ -45,7 +45,6 @@ func GetSize(urls string) (int64, error) {
 }
 
 type DownloadProgress struct {
-	from int64
 	to   int64
 	pos  int64
 }
@@ -56,10 +55,9 @@ type PartialDownloader struct {
 	url    string
 	file   *os.File
 }
-func (pd *PartialDownloader) Init(url string, file  *os.File, from int64, pos int64, to int64) {
+func (pd *PartialDownloader) Init(url string, file  *os.File, pos int64, to int64) {
 	pd.file=file
 	pd.url=url
-	pd.dp.from=from
 	pd.dp.to=to
 	pd.dp.pos=pos
 }
@@ -81,7 +79,8 @@ func (pd *PartialDownloader)BeforeDownload() error {
 	if err!=nil {
 		return err
 	}
-	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.from, 10)+"-"+strconv.FormatInt(pd.dp.to, 10))
+	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.pos, 10)+"-"+strconv.FormatInt(pd.dp.to, 10))
+	log.Println(pd.dp.pos,pd.dp.to)
 	//ok we construct query
 	//try send request
 	resp, err := pd.client.Do(r)
@@ -114,7 +113,7 @@ func (pd *PartialDownloader)DownloadSergment() (bool, error) {
 	//write flush data to disk
 	buffer := make([]byte, FlushDiskSize, FlushDiskSize)
 	count, err := pd.req.Body.Read(buffer)
-	if (err!=nil) {
+	if ((err!=nil)&&(err.Error()!="EOF")) {
 		pd.req.Body.Close()
 		pd.file.Sync()
 		return true, err
@@ -127,10 +126,12 @@ func (pd *PartialDownloader)DownloadSergment() (bool, error) {
 	}
 
 	pd.dp.pos=pd.dp.pos+int64(realc)
+	log.Printf("real %v pos %v to %v",realc,pd.dp.pos,pd.dp.to)
 	if (pd.dp.pos==pd.dp.to) {
 		//ok download part complete normal
 		pd.file.Sync()
 		pd.req.Body.Close()
+		log.Printf("finish")
 		return true, nil
 	}
 	//not full download next segment
