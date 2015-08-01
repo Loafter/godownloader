@@ -89,6 +89,7 @@ func (mw *MonitoredWorker) Start() error {
 		return errors.New("error: try run runing job")
 	}
 	if err := mw.Itw.BeforeRun(); err != nil {
+		mw.state = Failed
 		return err
 	}
 
@@ -102,8 +103,9 @@ func (mw *MonitoredWorker) Start() error {
 func (mw *MonitoredWorker) Stop() error {
 	mw.lc.Lock()
 	defer mw.lc.Unlock()
-	if mw.state == Stopped {
-		panic("imposible start runing job")
+	if mw.state != Running {
+		return errors.New("error: imposible stop non runing job")
+
 	}
 	mw.chsig <- Stopped
 	mw.wgrun.Wait()

@@ -2,38 +2,53 @@ package dtest
 
 import (
 	"godownloader/http"
+	"godownloader/iotools"
 	"godownloader/monitor"
 	"log"
-	"os"
 	"testing"
 	"time"
 )
 
 func TestPartDownloadWorker(t *testing.T) {
-	c, _ := httpclient.GetSize("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso")
-	f, _ := os.Create("part_download.data")
+	return
+	url := "http://releases.ubuntu.com/14.04.2/ubuntu-14.04.2-server-amd64.list"
+	c, _ := httpclient.GetSize(url)
+	f, _ := iotools.Create("g_ubuntu-14.04.2-server-amd64.list")
 	defer f.Close()
-	f.Truncate(c)
-	dow := new(httpclient.PartialDownloader)
-	dow.Init("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0, c)
-	var i monitor.IterationWork
-	i = dow
-	/*i.BeforeRun()
-	for {
-		sta, _ := i.DoWork()
-		if sta {
-			return
-		}
-		log.Println(i.GetProgress())
-	}*/
-	mv := monitor.MonitoredWorker{Itw: i}
+	log.Println(f.Truncate(c))
+	dow := httpclient.CreateDownloader(url, f, 0, c)
+	mv := monitor.MonitoredWorker{Itw: dow}
 	log.Println(mv.Start())
 	log.Println(mv.Start())
 	time.Sleep(time.Second * 1)
-	/*log.Println(mv.Stop())
-	time.Sleep(time.Second*2)
+	log.Println(mv.Stop())
+	time.Sleep(time.Second * 5)
 	log.Println(mv.Start())
 	log.Println(mv.Start())
-	time.Sleep(time.Second*5)
-	log.Println(mv.Stop())*/
+	time.Sleep(time.Second * 5)
+	log.Println(mv.Stop())
+}
+
+func TestMultiPartDownloadWorker(t *testing.T) {
+	pc := int64(6)
+	url := "http://releases.ubuntu.com/14.04.2/ubuntu-14.04.2-server-amd64.list"
+	c, _ := httpclient.GetSize(url)
+	f, _ := iotools.Create("gm_ubuntu-14.04.2-server-amd64.list")
+	defer f.Close()
+	f.Truncate(c)
+	ps := c / pc
+	for i := int64(0); i < pc-1; i++ {
+		log.Println(ps*i, ps*i+ps)
+		dow := httpclient.CreateDownloader(url, f, ps*i, ps*i+ps)
+		mv := monitor.MonitoredWorker{Itw: dow}
+		mv.Start()
+	}
+
+	log.Println(c-ps, c)
+	dow := httpclient.CreateDownloader(url, f, c-ps, c)
+	mv := monitor.MonitoredWorker{Itw: dow}
+	mv.Start()
+
+	time.Sleep(time.Second * 5)
+
 }
