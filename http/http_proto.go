@@ -129,7 +129,6 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 		count = int(pd.dp.to - pd.dp.pos)
 		log.Printf("warning: server return to much for me i give only %v bytes", count)
 	}
-	log.Println(buffer[:count])
 	realc, err := pd.file.WriteAt(buffer[:count], pd.dp.pos)
 	if err != nil {
 		pd.file.Sync()
