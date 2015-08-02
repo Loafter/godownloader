@@ -42,7 +42,7 @@ func (mw *MonitoredWorker) wgoroute() {
 	log.Println("info: work start", mw.GetId())
 	mw.wgrun.Add(1)
 	defer func() {
-		log.Print("info: realease work guid", mw.GetId())
+		log.Print("info: realease work guid ", mw.GetId())
 		mw.wgrun.Done()
 	}()
 
@@ -85,6 +85,9 @@ func (mw *MonitoredWorker) GetId() string {
 func (mw *MonitoredWorker) Start() error {
 	mw.lc.Lock()
 	defer mw.lc.Unlock()
+	if mw.state == Completed {
+		return errors.New("error: try run compleated job")
+	}
 	if mw.state == Running {
 		return errors.New("error: try run runing job")
 	}

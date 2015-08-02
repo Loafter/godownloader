@@ -26,7 +26,7 @@ func CheckMultipart(urls string) (bool, error) {
 		return false, errors.New("error: file not found or moved status: " + resp.Status)
 	}
 	if resp.ContentLength == 1 {
-		log.Printf("info: file size is %d bytes \n", resp.ContentLength)
+		log.Printf("info: multipart download support \n")
 		return true, nil
 	}
 	return false, nil
@@ -117,27 +117,32 @@ func (pd *PartialDownloader) AfterStop() error {
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	//write flush data to disk
 	buffer := make([]byte, FlushDiskSize, FlushDiskSize)
+
 	count, err := pd.req.Body.Read(buffer)
 	if (err != nil) && (err.Error() != "EOF") {
 		pd.req.Body.Close()
 		pd.file.Sync()
 		return true, err
 	}
-	log.Println("info: try write")
+	log.Printf("returned from server %v bytes", count)
+	if pd.dp.pos+int64(count) > pd.dp.to {
+		count = int(pd.dp.to - pd.dp.pos)
+		log.Printf("warning: server return to much for me i give only %v bytes", count)
+	}
+	log.Println(buffer[:count])
 	realc, err := pd.file.WriteAt(buffer[:count], pd.dp.pos)
 	if err != nil {
 		pd.file.Sync()
 		pd.req.Body.Close()
 		return true, err
 	}
-
 	pd.dp.pos = pd.dp.pos + int64(realc)
 	log.Printf("writed %v pos %v to %v", realc, pd.dp.pos, pd.dp.to)
 	if pd.dp.pos == pd.dp.to {
 		//ok download part complete normal
 		pd.file.Sync()
 		pd.req.Body.Close()
-		log.Printf("finish")
+		log.Printf("info: download compleate normal")
 		return true, nil
 	}
 	//not full download next segment

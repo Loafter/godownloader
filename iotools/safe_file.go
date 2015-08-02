@@ -16,6 +16,11 @@ func (sf *SafeFile) WriteAt(b []byte, off int64) (n int, err error) {
 	return sf.File.WriteAt(b, off)
 }
 
+func (sf *SafeFile) Sync() error {
+	sf.lock.Lock()
+	defer sf.lock.Unlock()
+	return sf.File.Sync()
+}
 func Open(name string) (file *SafeFile, err error) {
 	f, err := os.OpenFile(name, os.O_RDONLY, 0)
 	return &SafeFile{File: f}, err
