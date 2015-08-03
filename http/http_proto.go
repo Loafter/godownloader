@@ -54,12 +54,12 @@ type DownloadProgress struct {
 type PartialDownloader struct {
 	dp     DownloadProgress
 	client http.Client
-	req    *http.Response
+	req    http.Response
 	url    string
 	file   *iotools.SafeFile
 }
 
-func CreateDownloader(url string, file *iotools.SafeFile, pos int64, to int64) *PartialDownloader {
+func CreatePartialDownloader(url string, file *iotools.SafeFile, pos int64, to int64) *PartialDownloader {
 	var pd PartialDownloader
 	pd.file = file
 	pd.url = url
@@ -99,7 +99,7 @@ func (pd *PartialDownloader) BeforeDownload() error {
 		log.Printf("error: file not found or moved status:", resp.StatusCode)
 		return errors.New("error: file not found or moved")
 	}
-	pd.req = resp
+	pd.req = *resp
 	return nil
 }
 func (pd *PartialDownloader) AfterStopDownload() error {
@@ -113,7 +113,6 @@ func (pd *PartialDownloader) BeforeRun() error {
 func (pd *PartialDownloader) AfterStop() error {
 	return pd.AfterStopDownload()
 }
-
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	//write flush data to disk
 	buffer := make([]byte, FlushDiskSize, FlushDiskSize)
@@ -141,7 +140,7 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 		//ok download part complete normal
 		pd.file.Sync()
 		pd.req.Body.Close()
-		log.Printf("info: download compleate normal")
+		log.Printf("info: download complete normal")
 		return true, nil
 	}
 	//not full download next segment

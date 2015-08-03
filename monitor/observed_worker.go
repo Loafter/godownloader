@@ -95,7 +95,6 @@ func (mw *MonitoredWorker) Start() error {
 		mw.state = Failed
 		return err
 	}
-
 	mw.chsig = make(chan int, 1)
 	mw.state = Running
 	go mw.wgoroute()

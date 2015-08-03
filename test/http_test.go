@@ -37,10 +37,10 @@ func TestPartDownload(t *testing.T) {
 	if e != nil {
 		t.Error("failed: Get size must be without error")
 	}
-	f, _ := iotools.Create("part_download.data")
+	f, _ := iotools.CreateSafeFile("part_download.data")
 	defer f.Close()
 	f.Truncate(c)
-	dow := httpclient.CreateDownloader("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0, c)
+	dow := httpclient.CreatePartialDownloader("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0, c)
 	dow.BeforeRun()
 	for {
 		sta, _ := dow.DoWork()
