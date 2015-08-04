@@ -86,7 +86,7 @@ func (mw *MonitoredWorker) Start() error {
 	mw.lc.Lock()
 	defer mw.lc.Unlock()
 	if mw.state == Completed {
-		return errors.New("error: try run compleated job")
+		return errors.New("error: try run completed job")
 	}
 	if mw.state == Running {
 		return errors.New("error: try run runing job")

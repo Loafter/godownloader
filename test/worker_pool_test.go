@@ -1,13 +1,13 @@
 package dtest
 
 import (
-	"testing"
-	"godownloader/monitor"
-	"time"
 	"errors"
 	"fmt"
-	"math/rand"
+	"godownloader/monitor"
 	"log"
+	"math/rand"
+	"testing"
+	"time"
 )
 
 type TestWorkPool struct {
@@ -19,19 +19,17 @@ func (tw TestWorkPool) GetProgress() interface{} {
 
 }
 
-
-func (tw *TestWorkPool)BeforeRun()error{
+func (tw *TestWorkPool) BeforeRun() error {
 	log.Println("info: exec before run")
 	return nil
 }
-func (tw *TestWorkPool)AfterStop()error{
+func (tw *TestWorkPool) AfterStop() error {
 	log.Println("info: after stop")
 	return nil
 }
 
-
 func (tw *TestWorkPool) DoWork() (bool, error) {
-	time.Sleep(time.Millisecond*300)
+	time.Sleep(time.Millisecond * 300)
 	tw.From += 1
 	log.Print(tw.From)
 	if tw.From == tw.To {
@@ -46,7 +44,7 @@ func (tw *TestWorkPool) DoWork() (bool, error) {
 func TestWorkerPool(t *testing.T) {
 	wp := monitor.WorkerPool{}
 	for i := 0; i < 20; i++ {
-		mw := &monitor.MonitoredWorker{Itw:&TestWorkPool{From:0, To:20, id:rand.Int31()}}
+		mw := &monitor.MonitoredWorker{Itw: &TestWorkPool{From: 0, To: 20, id: rand.Int31()}}
 		wp.AppendWork(mw)
 	}
 	wp.StartAll()
@@ -60,7 +58,7 @@ func TestWorkerPool(t *testing.T) {
 
 	time.Sleep(time.Second)
 	wp.StartAll()
-	time.Sleep(time.Second*5)
+	time.Sleep(time.Second * 5)
 	wp.StopAll()
 	wp.StartAll()
 	wp.StopAll()
