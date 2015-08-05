@@ -31,7 +31,6 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 		//can't get file size
 		return nil, err
 	}
-
 	sf, err := iotools.CreateSafeFile(fp)
 	if err != nil {
 		//can't create file on path

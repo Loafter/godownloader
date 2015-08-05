@@ -73,22 +73,12 @@ func (pd PartialDownloader) GetProgress() interface{} {
 }
 
 func (pd *PartialDownloader) BeforeDownload() error {
-	/*nos, err := CheckMultipart(pd.url)
-	if !nos {
-		return errors.New("error: server unsupport part support")
-	}
-	if err != nil {
-		return err
-	}*/
 	//create new req
 	r, err := http.NewRequest("GET", pd.url, nil)
 	if err != nil {
 		return err
 	}
 	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.Pos, 10)+"-"+strconv.FormatInt(pd.dp.To, 10))
-	//log.Printf("requested <%v-%v>", pd.dp.Pos, pd.dp.To)
-	//ok we construct query
-	//try send request
 	resp, err := pd.client.Do(r)
 	if err != nil {
 		log.Printf("error: error download part file%v \n", err)
