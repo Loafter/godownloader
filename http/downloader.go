@@ -17,6 +17,14 @@ func (dl *Downloader) StopAll() error {
 func (dl *Downloader) StartAll() error {
 	return dl.wp.StartAll()
 }
+func (dl *Downloader) GetProgress() []DownloadProgress {
+	pr := dl.wp.GetAllProgress().([]interface{})
+	re := make([]DownloadProgress, len(pr))
+	for i, val := range pr {
+		re[i] = val.(DownloadProgress)
+	}
+	return re
+}
 func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err error) {
 	c, err := GetSize(url)
 	if err != nil {
@@ -42,7 +50,7 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 		mv := monitor.MonitoredWorker{Itw: d}
 		wp.AppendWork(&mv)
 	}
-	lastseg := int64(c - (ps * (seg - 1)))
+	lastseg := int64(ps * (seg - 1))
 	dow := CreatePartialDownloader(url, sf, lastseg, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
 

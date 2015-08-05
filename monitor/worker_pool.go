@@ -31,9 +31,10 @@ func (wp *WorkerPool) StopAll() error {
 }
 
 func (wp *WorkerPool) GetAllProgress() interface{} {
-	rs := make([]interface{}, 1)
+	rs := make([]interface{}, 0, len(wp.workers))
 	for _, value := range wp.workers {
 		rs = append(rs, value.GetProgress())
 	}
+	//log.Println(rs)
 	return rs
 }

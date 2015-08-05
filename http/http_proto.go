@@ -48,8 +48,8 @@ func GetSize(urls string) (int64, error) {
 }
 
 type DownloadProgress struct {
-	to  int64
-	pos int64
+	To  int64
+	Pos int64
 }
 type PartialDownloader struct {
 	dp     DownloadProgress
@@ -63,8 +63,8 @@ func CreatePartialDownloader(url string, file *iotools.SafeFile, pos int64, to i
 	var pd PartialDownloader
 	pd.file = file
 	pd.url = url
-	pd.dp.to = to
-	pd.dp.pos = pos
+	pd.dp.To = to
+	pd.dp.Pos = pos
 	return &pd
 }
 
@@ -73,20 +73,20 @@ func (pd PartialDownloader) GetProgress() interface{} {
 }
 
 func (pd *PartialDownloader) BeforeDownload() error {
-	nos, err := CheckMultipart(pd.url)
+	/*nos, err := CheckMultipart(pd.url)
 	if !nos {
 		return errors.New("error: server unsupport part support")
 	}
 	if err != nil {
 		return err
-	}
+	}*/
 	//create new req
 	r, err := http.NewRequest("GET", pd.url, nil)
 	if err != nil {
 		return err
 	}
-	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.pos, 10)+"-"+strconv.FormatInt(pd.dp.to, 10))
-	log.Printf("requested <%v-%v>", pd.dp.pos, pd.dp.to)
+	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.Pos, 10)+"-"+strconv.FormatInt(pd.dp.To, 10))
+	//log.Printf("requested <%v-%v>", pd.dp.Pos, pd.dp.To)
 	//ok we construct query
 	//try send request
 	resp, err := pd.client.Do(r)
@@ -123,20 +123,20 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 		pd.file.Sync()
 		return true, err
 	}
-	log.Printf("returned from server %v bytes", count)
-	if pd.dp.pos+int64(count) > pd.dp.to {
-		count = int(pd.dp.to - pd.dp.pos)
+	//log.Printf("returned from server %v bytes", count)
+	if pd.dp.Pos+int64(count) > pd.dp.To {
+		count = int(pd.dp.To - pd.dp.Pos)
 		log.Printf("warning: server return to much for me i give only %v bytes", count)
 	}
-	realc, err := pd.file.WriteAt(buffer[:count], pd.dp.pos)
+	realc, err := pd.file.WriteAt(buffer[:count], pd.dp.Pos)
 	if err != nil {
 		pd.file.Sync()
 		pd.req.Body.Close()
 		return true, err
 	}
-	pd.dp.pos = pd.dp.pos + int64(realc)
-	log.Printf("writed %v pos %v to %v", realc, pd.dp.pos, pd.dp.to)
-	if pd.dp.pos == pd.dp.to {
+	pd.dp.Pos = pd.dp.Pos + int64(realc)
+	//log.Printf("writed %v pos %v to %v", realc, pd.dp.Pos, pd.dp.To)
+	if pd.dp.Pos == pd.dp.To {
 		//ok download part complete normal
 		pd.file.Sync()
 		pd.req.Body.Close()
