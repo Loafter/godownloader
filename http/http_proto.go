@@ -48,8 +48,9 @@ func GetSize(urls string) (int64, error) {
 }
 
 type DownloadProgress struct {
-	To  int64
-	Pos int64
+	from int64
+	To   int64
+	Pos  int64
 }
 type PartialDownloader struct {
 	dp     DownloadProgress

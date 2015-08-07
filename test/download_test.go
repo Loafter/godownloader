@@ -8,7 +8,7 @@ import (
 )
 
 func TestDownload(t *testing.T) {
-	dl, err := httpclient.CreateDownloader("http://mirror.yandex.ru/ubuntu-cdimage/xubuntu/releases/12.04/release/xubuntu-12.04.4-desktop-amd64.iso.zsync", "xubuntu-12.04.4-desktop-amd64.iso.zsync", 15)
+	dl, err := httpclient.CreateDownloader("http://pinegrow.s3.amazonaws.com/PinegrowLinux64.2.2.zip", "xubuntu-12.04.4-desktop-amd64.iso.zsync", 15)
 	if err != nil {
 		t.Error("failed: can't create downloader")
 	}
