@@ -3,15 +3,20 @@ package httpclient
 import (
 	"godownloader/iotools"
 	"godownloader/monitor"
+	"path"
 )
 
+type FileInfo struct {
+	Size     int64
+	FileName string
+}
 type Downloader struct {
-	sf   *iotools.SafeFile
-	size int64
-	wp   *monitor.WorkerPool
+	sf *iotools.SafeFile
+	wp *monitor.WorkerPool
+	fi FileInfo
 }
 
-func (dl *Downloader) StopAll() error {
+func (dl *Downloader) StopAll() []error {
 	return dl.wp.StopAll()
 }
 func (dl *Downloader) StartAll() error {
@@ -56,9 +61,9 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 	//add to worker pool
 	wp.AppendWork(&mv)
 	d := Downloader{
-		sf:   sf,
-		size: c,
-		wp:   wp,
+		sf: sf,
+		wp: wp,
+		fi: FileInfo{FileName: path.Base(fp), Size: c},
 	}
 	return &d, nil
 }

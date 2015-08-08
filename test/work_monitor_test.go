@@ -62,7 +62,7 @@ func TestWorker(t *testing.T) {
 
 	tes.Start()
 	time.Sleep(time.Second * 1)
-	if tes.GetState() != 2 {
+	if tes.GetState() != 3 {
 		t.Error("Expected Failed(3)")
 		return
 	}

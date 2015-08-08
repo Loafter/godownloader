@@ -21,20 +21,18 @@ func (wp *WorkerPool) StartAll() error {
 	return nil
 }
 
-func (wp *WorkerPool) StopAll() error {
+func (wp *WorkerPool) StopAll() []error {
+	var errs []error
 	for _, value := range wp.workers {
-		if err := value.Stop(); err != nil {
-			return err
-		}
+		errs = append(errs, value.Stop())
 	}
-	return nil
+	return errs
 }
 
 func (wp *WorkerPool) GetAllProgress() interface{} {
-	rs := make([]interface{}, 0, len(wp.workers))
+	var errs []error
 	for _, value := range wp.workers {
-		rs = append(rs, value.GetProgress())
+		errs = append(errs, value.Start())
 	}
-	//log.Println(rs)
-	return rs
+	return errs
 }
