@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	//	"time"
 )
 
 const FlushDiskSize = 1024 * 1024
@@ -48,9 +49,11 @@ func GetSize(urls string) (int64, error) {
 }
 
 type DownloadProgress struct {
-	from int64
-	To   int64
-	Pos  int64
+	from  int64
+	To    int64
+	Pos   int64
+	Speed int
+	Lsmt  int64
 }
 type PartialDownloader struct {
 	dp     DownloadProgress
@@ -104,6 +107,11 @@ func (pd *PartialDownloader) BeforeRun() error {
 func (pd *PartialDownloader) AfterStop() error {
 	return pd.AfterStopDownload()
 }
+
+func (pd *PartialDownloader) messureSpeed(realc int) {
+	//pd.dp.Speed=10000*realc/pd.dp
+	//pd.dp.Lsmt=time.Now()
+}
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	//write flush data to disk
 	buffer := make([]byte, FlushDiskSize, FlushDiskSize)
@@ -126,6 +134,7 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 		return true, err
 	}
 	pd.dp.Pos = pd.dp.Pos + int64(realc)
+	pd.messureSpeed(realc)
 	//log.Printf("writed %v pos %v to %v", realc, pd.dp.Pos, pd.dp.To)
 	if pd.dp.Pos == pd.dp.To {
 		//ok download part complete normal

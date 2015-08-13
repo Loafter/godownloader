@@ -10,9 +10,13 @@ import (
 	"sync"
 )
 
-type Jobs struct {
-	FileName string
-	Size     int64
+type DJob struct {
+	Id         int
+	FileName   string
+	Size       int64
+	Downloaded int64
+	Progress   int64
+	Speed      int
 }
 
 type NewJob struct {
@@ -29,6 +33,7 @@ type DServ struct {
 func (srv *DServ) Start(listenPort int) error {
 	http.HandleFunc("/progress.json", srv.ProgressJson)
 	http.HandleFunc("/add_task", srv.AddTask)
+	http.HandleFunc("/remove_task", srv.RemoveTask)
 	if err := http.ListenAndServe(":"+strconv.Itoa(listenPort), nil); err != nil {
 		return err
 	}
@@ -96,5 +101,20 @@ func (srv *DServ) RemoveTask(rwr http.ResponseWriter, req *http.Request) {
 }
 
 func (srv *DServ) ProgressJson(rwr http.ResponseWriter, req *http.Request) {
+	rwr.Header().Set("Access-Control-Allow-Origin", "*")
+	jbs := make([]DJob, 0, len(srv.dls))
+	for _, i := range srv.dls {
+		j := DJob{
+			FileName: i.Fi.FileName,
+			Size:     i.Fi.Size,
+		}
+		jbs = append(jbs, j)
+	}
+	js, err := json.Marshal(jbs)
+	if err != nil {
+		http.Error(rwr, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	rwr.Write(js)
 
 }

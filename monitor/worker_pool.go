@@ -30,9 +30,9 @@ func (wp *WorkerPool) StopAll() []error {
 }
 
 func (wp *WorkerPool) GetAllProgress() interface{} {
-	var errs []error
+	var pr []interface{}
 	for _, value := range wp.workers {
-		errs = append(errs, value.Start())
+		pr = append(pr, value.GetProgress())
 	}
-	return errs
+	return pr
 }

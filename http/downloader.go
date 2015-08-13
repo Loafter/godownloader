@@ -13,7 +13,7 @@ type FileInfo struct {
 type Downloader struct {
 	sf *iotools.SafeFile
 	wp *monitor.WorkerPool
-	fi FileInfo
+	Fi FileInfo
 }
 
 func (dl *Downloader) StopAll() []error {
@@ -63,7 +63,7 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 	d := Downloader{
 		sf: sf,
 		wp: wp,
-		fi: FileInfo{FileName: path.Base(fp), Size: c},
+		Fi: FileInfo{FileName: path.Base(fp), Size: c},
 	}
 	return &d, nil
 }
