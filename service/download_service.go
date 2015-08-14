@@ -1,6 +1,7 @@
 package DownloadService
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"godownloader/http"
 	"io/ioutil"
@@ -34,10 +35,23 @@ func (srv *DServ) Start(listenPort int) error {
 	http.HandleFunc("/progress.json", srv.ProgressJson)
 	http.HandleFunc("/add_task", srv.AddTask)
 	http.HandleFunc("/remove_task", srv.RemoveTask)
+	http.HandleFunc("/index.html", srv.index)
 	if err := http.ListenAndServe(":"+strconv.Itoa(listenPort), nil); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (srv *DServ) index(rwr http.ResponseWriter, req *http.Request) {
+	rwr.Header().Set("Content-Type: text/html", "*")
+	content, err := ioutil.ReadFile("index.html")
+	if err != nil {
+		log.Println("warning: start page not found, return included page")
+		val, _ := base64.StdEncoding.DecodeString("htmlData")
+		rwr.Write(val)
+		return
+	}
+	rwr.Write(content)
 }
 
 func (srv *DServ) AddTask(rwr http.ResponseWriter, req *http.Request) {
@@ -103,8 +117,9 @@ func (srv *DServ) RemoveTask(rwr http.ResponseWriter, req *http.Request) {
 func (srv *DServ) ProgressJson(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Header().Set("Access-Control-Allow-Origin", "*")
 	jbs := make([]DJob, 0, len(srv.dls))
-	for _, i := range srv.dls {
+	for ind, i := range srv.dls {
 		j := DJob{
+			Id:       ind,
 			FileName: i.Fi.FileName,
 			Size:     i.Fi.Size,
 		}
