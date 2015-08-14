@@ -36,6 +36,7 @@ func (srv *DServ) Start(listenPort int) error {
 	http.HandleFunc("/add_task", srv.AddTask)
 	http.HandleFunc("/remove_task", srv.RemoveTask)
 	http.HandleFunc("/start_task", srv.StartTask)
+	http.HandleFunc("/stop_task", srv.StopTask)
 	http.HandleFunc("/index.html", srv.index)
 	if err := http.ListenAndServe(":"+strconv.Itoa(listenPort), nil); err != nil {
 		return err
@@ -117,6 +118,35 @@ func (srv *DServ) StartTask(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(js)
 }
 
+func (srv *DServ) StopTask(rwr http.ResponseWriter, req *http.Request) {
+	srv.oplock.Lock()
+	defer func() {
+		srv.oplock.Unlock()
+		req.Body.Close()
+	}()
+	bodyData, err := ioutil.ReadAll(req.Body)
+	rwr.Header().Set("Access-Control-Allow-Origin", "*")
+	if err != nil {
+		http.Error(rwr, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+	var ind int
+	if err := json.Unmarshal(bodyData, &ind); err != nil {
+		http.Error(rwr, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+	if !(len(srv.dls) > ind) {
+		http.Error(rwr, "error: id is out of jobs list", http.StatusInternalServerError)
+		return
+	}
+
+	srv.dls[ind].StopAll()
+	js, _ := json.Marshal("ok")
+	rwr.Write(js)
+}
+
 func (srv *DServ) RemoveTask(rwr http.ResponseWriter, req *http.Request) {
 	srv.oplock.Lock()
 	defer func() {
@@ -156,7 +186,7 @@ func (srv *DServ) ProgressJson(rwr http.ResponseWriter, req *http.Request) {
 		var s int64
 		for _, p := range prs {
 			d = d + (p.Pos - p.From)
-			s += p.Speed
+			s += p.Speed.Avg()
 		}
 		j := DJob{
 			Id:         ind,

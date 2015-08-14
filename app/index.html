@@ -44,19 +44,19 @@
 					}, {
 						label: 'File Name',
 						name: 'FileName',
-						width: 55
+						width: 15
 					}, {
 						label: 'Size',
 						name: 'Size',
-						width: 12
+						width: 20
 					}, {
 						label: 'Downloaded',
 						name: 'Downloaded',
-						width: 25
+						width: 20
 					}, {
-						label: 'Progress %',
+						label: '%',
 						name: 'Progress',
-						width: 25
+						width: 5
 					}, {
 						label: 'Speed',
 						name: 'Speed',
@@ -165,6 +165,22 @@
 				})
 		}
 
+
+		function StopDownload() {
+			var grid = $("#jqGrid");
+			var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
+			var req = rowKey;
+			$.ajax({
+					url: "/stop_task",
+					type: "POST",
+					data: JSON.stringify(req),
+					dataType: "text"
+				})
+				.error(function(jsonData) {
+					console.log(jsonData)
+				})
+		}
+
 	</script>
 </head>
 
@@ -196,7 +212,7 @@
                         <li onclick="StartDownload()">
                             <a href="#">Start</a>
                         </li>
-                        <li>
+                        <li onclick="StopDownload()">
                             <a href="#">Stop</a>
                         </li>
                         <li class="divider"></li>
@@ -235,7 +251,7 @@
 
                     <div class="controls">
                         <input type="text" id="url_id" class="form-control"
-                               value="http://mirror.yandex.ru/ubuntu-cdimage/kubuntu/releases/15.10/alpha-1/wily-desktop-amd64.iso">
+                               value="http://mirrors.mit.edu/ubuntu-releases/15.04/ubuntu-15.04-desktop-amd64.iso">
                     </div>
                     <label class="control-label">Save path</label>
 

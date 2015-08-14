@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	//	"time"
+	"container/list"
+	"time"
 )
 
 const FlushDiskSize = 1024 * 1024
@@ -48,12 +50,31 @@ func GetSize(urls string) (int64, error) {
 	return resp.ContentLength, nil
 }
 
+type AvgSpeed struct {
+	list.List
+}
+
+func (a *AvgSpeed) Push(s int64) {
+	a.PushBack(s)
+	if a.List.Len() > 10 {
+		a.Remove(a.Front())
+	}
+}
+
+func (a *AvgSpeed) Avg() int64 {
+	var i int64
+	for e := a.Front(); e != nil; e = e.Next() {
+		i += e.Value.(int64)
+	}
+	return i / 10
+}
+
 type DownloadProgress struct {
 	From  int64
 	To    int64
 	Pos   int64
-	Speed int64
-	Lsmt  int64
+	Speed AvgSpeed
+	Lsmt  time.Time
 }
 type PartialDownloader struct {
 	dp     DownloadProgress
@@ -110,8 +131,8 @@ func (pd *PartialDownloader) AfterStop() error {
 }
 
 func (pd *PartialDownloader) messureSpeed(realc int) {
-	//pd.dp.Speed=10000*realc/pd.dp
-	//pd.dp.Lsmt=time.Now()
+	pd.dp.Speed.PushBack(1000000000 * int64(realc) / time.Since(pd.dp.Lsmt).Nanoseconds())
+	pd.dp.Lsmt = time.Now()
 }
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	//write flush data to disk
