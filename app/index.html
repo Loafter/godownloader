@@ -1,30 +1,31 @@
+
 <!doctype html>
 
 <html>
 
 <head>
-	<title>Jumbotron</title>
-	<meta name="viewport" content="width=device-width">
-	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootswatch/3.0.0/journal/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" media="screen"
-		  href="http://www.guriddo.net/demo/css/trirand/ui.jqgrid-bootstrap.css">
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-	<script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="http://www.guriddo.net/demo/js/trirand/jquery.jqGrid.min.js"></script>
-	<script type="text/javascript" src="http://www.guriddo.net/demo/js/trirand/i18n/grid.locale-en.js"></script>
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-	<style type="text/css">
-		body {
-		padding-top: 50px;
-		padding-bottom: 20px;
-		}
+    <title>Jumbotron</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootswatch/3.0.0/journal/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen"
+          href="http://www.guriddo.net/demo/css/trirand/ui.jqgrid-bootstrap.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://www.guriddo.net/demo/js/trirand/jquery.jqGrid.min.js"></script>
+    <script type="text/javascript" src="http://www.guriddo.net/demo/js/trirand/i18n/grid.locale-en.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <style type="text/css">
+        body {
+        padding-top: 50px;
+        padding-bottom: 20px;
+        }
 
-		.table .progress {
-		margin-bottom: 0px;
-		}
-	</style>
-	<script type="text/javascript">
+        .table .progress {
+        margin-bottom: 0px;
+        }
+    </style>
+    <script type="text/javascript">
 		function UpdateTable() {
 			$("#jqGrid")
 				.jqGrid({
@@ -114,12 +115,12 @@
 
 			UpdateTable()
 			FixTable()
-			setInterval(UpdateData, 1500);
+			setInterval(UpdateData, 500);
 		}
 
 		function AddDownload() {
 			var req = {
-				PartCount:parseInt($("#part_count_id").val()),
+				PartCount: parseInt($("#part_count_id").val()),
 				FilePath: $("#save_path_id").val(),
 				Url: $("#url_id").val()
 			};
@@ -133,11 +134,11 @@
 					console.log(jsonData)
 				})
 		}
-		
-			function RemoveDownload() {
-			  	var grid = $("#jqGrid");
-			  var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
-			var req =rowKey;
+
+		function RemoveDownload() {
+			var grid = $("#jqGrid");
+			var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
+			var req = rowKey;
 			$.ajax({
 					url: "/remove_task",
 					type: "POST",
@@ -148,103 +149,116 @@
 					console.log(jsonData)
 				})
 		}
-		
-	
+
+		function StartDownload() {
+			var grid = $("#jqGrid");
+			var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
+			var req = rowKey;
+			$.ajax({
+					url: "/start_task",
+					type: "POST",
+					data: JSON.stringify(req),
+					dataType: "text"
+				})
+				.error(function(jsonData) {
+					console.log(jsonData)
+				})
+		}
 
 	</script>
 </head>
 
 <body onload="OnLoad()">
 <div class="navbar navbar-inverse navbar-fixed-top">
-	<div class="container">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-				<span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="#">GO Downloader</a>
-		</div>
-		<div class="navbar-collapse collapse">
-			<ul class="nav navbar-nav">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">File <b class="caret"></b></a>
-					<ul class="dropdown-menu">
-						<li>
-							<a data-toggle="modal" data-target="#myModal">Add download</a>
-						</li>
-						<li onclick="RemoveDownload()">
-							<a href="#">Delete download</a>
-						</li>
-					</ul>
-				</li>
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Action <b class="caret"></b></a>
-					<ul class="dropdown-menu">
-						<li>
-							<a href="#">Start</a>
-						</li>
-						<li>
-							<a href="#">Stop</a>
-						</li>
-						<li class="divider"></li>
-						<li>
-							<a href="#">Start all</a>
-						</li>
-						<li>
-							<a href="#">Stop all</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a href="#about">About</a>
-				</li>
-			</ul>
-		</div>
-		<!--/.navbar-collapse -->
-	</div>
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">GO Downloader</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">File <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a data-toggle="modal" data-target="#myModal">Add download</a>
+                        </li>
+                        <li onclick="RemoveDownload()">
+                            <a href="#">Delete download</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Action <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li onclick="StartDownload()">
+                            <a href="#">Start</a>
+                        </li>
+                        <li>
+                            <a href="#">Stop</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#">Start all</a>
+                        </li>
+                        <li>
+                            <a href="#">Stop all</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#about">About</a>
+                </li>
+            </ul>
+        </div>
+        <!--/.navbar-collapse -->
+    </div>
 </div>
 </P>
 <table id="jqGrid"></table>
 
 <!-- Modal -->
 <div class="modal fade" id="myModal" role="dialog">
-	<div class="modal-dialog">
+    <div class="modal-dialog">
 
-		<!-- Modal content-->
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-				<h4 class="modal-title">Enter Url</h4>
-			</div>
-			<div class="modal-body">
-				<div class="form-group">
-					<label class="control-label">Url</label>
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Enter Url</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="control-label">Url</label>
 
-					<div class="controls">
-						<input type="text" id="url_id" class="form-control"
-							   value="http://mirror.yandex.ru/debian/ls-lR.gz">
-					</div>
-					<label class="control-label">Save path</label>
+                    <div class="controls">
+                        <input type="text" id="url_id" class="form-control"
+                               value="http://mirror.yandex.ru/ubuntu-cdimage/kubuntu/releases/15.10/alpha-1/wily-desktop-amd64.iso">
+                    </div>
+                    <label class="control-label">Save path</label>
 
-					<div class="controls">
-						<input type="text" id="save_path_id" class="form-control" value="./ls-lR.gz">
-					</div>
-					<label class="control-label">Parts count</label>
-					<select class="form-control" id="part_count_id">
-						<option>1</option>
-						<option>2</option>
-						<option>4</option>
-						<option>8</option>
-						<option>16</option>
-					</select>
+                    <div class="controls">
+                        <input type="text" id="save_path_id" class="form-control" value="./ls-lR.gz">
+                    </div>
+                    <label class="control-label">Parts count</label>
+                    <select class="form-control" id="part_count_id">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>4</option>
+                        <option>8</option>
+                        <option>16</option>
+                    </select>
 
-					<div class="modal-footer">
-						<a class="btn btn-primary" onclick="AddDownload()" data-dismiss="modal">Start download</a>
-					</div>
-				</div>
-			</div>
-		</div>
+                    <div class="modal-footer">
+                        <a class="btn btn-primary" onclick="AddDownload()" data-dismiss="modal">Start download</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-	</div>
+    </div>
 </div>
 </body>
 

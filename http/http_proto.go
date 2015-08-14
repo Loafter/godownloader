@@ -49,10 +49,10 @@ func GetSize(urls string) (int64, error) {
 }
 
 type DownloadProgress struct {
-	from  int64
+	From  int64
 	To    int64
 	Pos   int64
-	Speed int
+	Speed int64
 	Lsmt  int64
 }
 type PartialDownloader struct {
@@ -67,6 +67,7 @@ func CreatePartialDownloader(url string, file *iotools.SafeFile, pos int64, to i
 	var pd PartialDownloader
 	pd.file = file
 	pd.url = url
+	pd.dp.From = pos
 	pd.dp.To = to
 	pd.dp.Pos = pos
 	return &pd
