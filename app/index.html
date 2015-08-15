@@ -60,7 +60,8 @@
 					}, {
 						label: 'Speed',
 						name: 'Speed',
-						width: 15
+						width: 15,
+						formatter: Formatkb
 					}, {
 						label: 'Progress',
 						name: 'Progress',
@@ -108,6 +109,12 @@
 
 			var cellHtml = '<div class="progress"><div class="progress-bar" style="width: ' + intVal + '%;"></div></div>'
 
+			return cellHtml;
+		}
+
+		function Formatkb(cellValue, options, rowObject) {
+			var intVal = parseInt(cellValue);
+			var cellHtml =intVal/1024
 			return cellHtml;
 		}
 
