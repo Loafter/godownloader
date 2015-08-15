@@ -131,7 +131,7 @@ func (pd *PartialDownloader) AfterStop() error {
 }
 
 func (pd *PartialDownloader) messureSpeed(realc int) {
-	pd.dp.Speed.PushBack(1000000000 * int64(realc) / time.Since(pd.dp.Lsmt).Nanoseconds())
+	pd.dp.Speed.Push(1000000000 * int64(realc) / time.Since(pd.dp.Lsmt).Nanoseconds())
 	pd.dp.Lsmt = time.Now()
 }
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
