@@ -37,6 +37,10 @@ func (srv *DServ) Start(listenPort int) error {
 	http.HandleFunc("/remove_task", srv.RemoveTask)
 	http.HandleFunc("/start_task", srv.StartTask)
 	http.HandleFunc("/stop_task", srv.StopTask)
+
+	http.HandleFunc("/start_all_task", srv.StartAllTask)
+	http.HandleFunc("/stop_all_task", srv.StopAllTask)
+
 	http.HandleFunc("/index.html", srv.index)
 	if err := http.ListenAndServe(":"+strconv.Itoa(listenPort), nil); err != nil {
 		return err
@@ -147,6 +151,49 @@ func (srv *DServ) StopTask(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(js)
 }
 
+func (srv *DServ) StartAllTask(rwr http.ResponseWriter, req *http.Request) {
+	srv.oplock.Lock()
+	defer func() {
+		srv.oplock.Unlock()
+		req.Body.Close()
+	}()
+	_, err := ioutil.ReadAll(req.Body)
+	rwr.Header().Set("Access-Control-Allow-Origin", "*")
+	if err != nil {
+		http.Error(rwr, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+	for _, e := range srv.dls {
+		if err := e.StartAll(); err != nil {
+			http.Error(rwr, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	js, _ := json.Marshal("ok")
+	rwr.Write(js)
+}
+
+func (srv *DServ) StopAllTask(rwr http.ResponseWriter, req *http.Request) {
+	srv.oplock.Lock()
+	defer func() {
+		srv.oplock.Unlock()
+		req.Body.Close()
+	}()
+	_, err := ioutil.ReadAll(req.Body)
+	rwr.Header().Set("Access-Control-Allow-Origin", "*")
+	if err != nil {
+		http.Error(rwr, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+	for _, e := range srv.dls {
+		e.StopAll()
+	}
+	js, _ := json.Marshal("ok")
+	rwr.Write(js)
+}
+
 func (srv *DServ) RemoveTask(rwr http.ResponseWriter, req *http.Request) {
 	srv.oplock.Lock()
 	defer func() {
@@ -186,7 +233,7 @@ func (srv *DServ) ProgressJson(rwr http.ResponseWriter, req *http.Request) {
 		var s int64
 		for _, p := range prs {
 			d = d + (p.Pos - p.From)
-			s += p.Speed.Avg()
+			s += p.Speed
 		}
 		j := DJob{
 			Id:         ind,
