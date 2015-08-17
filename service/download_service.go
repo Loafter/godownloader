@@ -142,8 +142,8 @@ func (srv *DServ) startTask(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := srv.dls[ind].StartAll(); err != nil {
-		http.Error(rwr, err.Error(), http.StatusInternalServerError)
+	if errs := srv.dls[ind].StartAll(); len(errs) > 0 {
+		http.Error(rwr, "error: can't start all part", http.StatusInternalServerError)
 		return
 	}
 	js, _ := json.Marshal("ok")

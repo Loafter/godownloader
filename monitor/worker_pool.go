@@ -10,21 +10,22 @@ func (wp *WorkerPool) AppendWork(iv *MonitoredWorker) {
 	}
 	wp.workers[iv.GetId()] = iv
 }
-func (wp *WorkerPool) StartAll() error {
-
+func (wp *WorkerPool) StartAll() []error {
+	var errs []error
 	for _, value := range wp.workers {
 		if err := value.Start(); err != nil {
-			return err
+			errs = append(errs, err)
 		}
-
 	}
-	return nil
+	return errs
 }
 
 func (wp *WorkerPool) StopAll() []error {
 	var errs []error
 	for _, value := range wp.workers {
-		errs = append(errs, value.Stop())
+		if err := value.Stop(); err != nil {
+			errs = append(errs, err)
+		}
 	}
 	return errs
 }

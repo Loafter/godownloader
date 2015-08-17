@@ -3,7 +3,7 @@ package httpclient
 import (
 	"godownloader/iotools"
 	"godownloader/monitor"
-	"path"
+	"log"
 )
 
 type FileInfo struct {
@@ -20,7 +20,7 @@ type Downloader struct {
 func (dl *Downloader) StopAll() []error {
 	return dl.wp.StopAll()
 }
-func (dl *Downloader) StartAll() error {
+func (dl *Downloader) StartAll() []error {
 	return dl.wp.StartAll()
 }
 func (dl *Downloader) GetProgress() []DownloadProgress {
@@ -64,7 +64,7 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 	d := Downloader{
 		sf: sf,
 		wp: wp,
-		Fi: FileInfo{FileName: path.Base(fp), Size: c, Url: url},
+		Fi: FileInfo{FileName: fp, Size: c, Url: url},
 	}
 	return &d, nil
 }
@@ -75,20 +75,21 @@ func RestoreDownloader(url string, fp string, dp []DownloadProgress) (dl *Downlo
 		//can't get file size
 		return nil, err
 	}
-	sf, err := iotools.CreateSafeFile(fp)
+	sf, err := iotools.OpenSafeFile(fp)
 	if err != nil {
 		//can't create file on path
 		return nil, err
 	}
 
-	if err := sf.Truncate(c); err != nil {
+	/*if err := sf.Truncate(c); err != nil {
 		//can't truncate file
 		return nil, err
-	}
+	}*/
 	//create part-downloader foreach segment
 	wp := new(monitor.WorkerPool)
 	for _, r := range dp {
 		dow := CreatePartialDownloader(url, sf, r.From, r.Pos, r.To)
+		log.Println(r.From, r.Pos, r.To)
 		mv := monitor.MonitoredWorker{Itw: dow}
 
 		//add to worker pool
@@ -98,7 +99,7 @@ func RestoreDownloader(url string, fp string, dp []DownloadProgress) (dl *Downlo
 	d := Downloader{
 		sf: sf,
 		wp: wp,
-		Fi: FileInfo{FileName: path.Base(fp), Size: c, Url: url},
+		Fi: FileInfo{FileName: fp, Size: c, Url: url},
 	}
 	return &d, nil
 }
