@@ -47,7 +47,8 @@
 					}, {
 						label: 'Size',
 						name: 'Size',
-						width: 20
+						width: 20,
+						formatter: FormatByte
 					}, {
 						label: 'Downloaded',
 						name: 'Downloaded',
@@ -60,7 +61,7 @@
 						label: 'Speed',
 						name: 'Speed',
 						width: 15,
-						formatter: Formatkb
+						formatter: FormatByte
 					}, {
 						label: 'Progress',
 						name: 'Progress',
@@ -111,9 +112,27 @@
 			return cellHtml;
 		}
 
-		function Formatkb(cellValue, options, rowObject) {
+		function FormatByte(cellValue, options, rowObject) {
 			var intVal = parseInt(cellValue);
-			var cellHtml = (intVal / 1024).toFixed(1);
+			var ras=" b."
+			if (intVal>1024){
+				intVal/=1024
+				ras=" kb."
+			}
+			if (intVal>1024){
+				intVal/=1024
+				ras=" Mb."
+			}
+			if (intVal>1024){
+				intVal/=1024
+				ras=" Gb."
+			}
+
+			if (intVal>1024){
+				intVal/=1024
+				ras=" Tb."
+			}
+			var cellHtml = (intVal).toFixed(1)+ras;
 			return cellHtml;
 		}
 
@@ -278,13 +297,13 @@
 
 					<div class="controls">
 						<input type="text" id="url_id" class="form-control"
-							   value="http://mirror.yandex.ru/ubuntu-cdimage/xubuntu/releases/15.04/release/xubuntu-15.04-desktop-i386.iso">
+							   value="http://ucmirror.canterbury.ac.nz/linux/ubuntu/trusty/wubi.exe">
 					</div>
 					<label class="control-label">Save path</label>
 
 					<div class="controls">
 						<input type="text" id="save_path_id" class="form-control"
-							   value="./xubuntu-15.04-desktop-i386.iso">
+							   value="./wubi.exe">
 					</div>
 					<label class="control-label">Parts count</label>
 					<select class="form-control" id="part_count_id">

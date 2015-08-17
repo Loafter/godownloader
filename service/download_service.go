@@ -32,13 +32,13 @@ type DServ struct {
 }
 
 func (srv *DServ) Start(listenPort int) error {
-	http.HandleFunc("/progress.json", srv.ProgressJson)
-	http.HandleFunc("/add_task", srv.AddTask)
-	http.HandleFunc("/remove_task", srv.RemoveTask)
-	http.HandleFunc("/start_task", srv.StartTask)
-	http.HandleFunc("/stop_task", srv.StopTask)
-	http.HandleFunc("/start_all_task", srv.StartAllTask)
-	http.HandleFunc("/stop_all_task", srv.StopAllTask)
+	http.HandleFunc("/progress.json", srv.progressJson)
+	http.HandleFunc("/add_task", srv.addTask)
+	http.HandleFunc("/remove_task", srv.removeTask)
+	http.HandleFunc("/start_task", srv.startTask)
+	http.HandleFunc("/stop_task", srv.stopTask)
+	http.HandleFunc("/start_all_task", srv.startAllTask)
+	http.HandleFunc("/stop_all_task", srv.stopAllTask)
 	http.HandleFunc("/index.html", srv.index)
 	if err := http.ListenAndServe(":"+strconv.Itoa(listenPort), nil); err != nil {
 		return err
@@ -88,7 +88,7 @@ func (srv *DServ) index(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(content)
 }
 
-func (srv *DServ) AddTask(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) addTask(rwr http.ResponseWriter, req *http.Request) {
 	srv.oplock.Lock()
 	defer func() {
 		srv.oplock.Unlock()
@@ -118,7 +118,7 @@ func (srv *DServ) AddTask(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(js)
 }
 
-func (srv *DServ) StartTask(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) startTask(rwr http.ResponseWriter, req *http.Request) {
 	srv.oplock.Lock()
 	defer func() {
 		srv.oplock.Unlock()
@@ -150,7 +150,7 @@ func (srv *DServ) StartTask(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(js)
 }
 
-func (srv *DServ) StopTask(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) stopTask(rwr http.ResponseWriter, req *http.Request) {
 	srv.oplock.Lock()
 	defer func() {
 		srv.oplock.Unlock()
@@ -179,7 +179,7 @@ func (srv *DServ) StopTask(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(js)
 }
 
-func (srv *DServ) StartAllTask(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) startAllTask(rwr http.ResponseWriter, req *http.Request) {
 	srv.oplock.Lock()
 	defer func() {
 		srv.oplock.Unlock()
@@ -199,10 +199,19 @@ func (srv *DServ) StartAllTask(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(js)
 }
 
-func (srv *DServ) StopAllTask(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) StopAllTask() {
 	srv.oplock.Lock()
 	defer func() {
 		srv.oplock.Unlock()
+	}()
+	for _, e := range srv.dls {
+		e.StopAll()
+	}
+}
+
+func (srv *DServ) stopAllTask(rwr http.ResponseWriter, req *http.Request) {
+	srv.oplock.Lock()
+	defer func() {
 		req.Body.Close()
 	}()
 	_, err := ioutil.ReadAll(req.Body)
@@ -212,14 +221,12 @@ func (srv *DServ) StopAllTask(rwr http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		return
 	}
-	for _, e := range srv.dls {
-		e.StopAll()
-	}
+	srv.StopAllTask()
 	js, _ := json.Marshal("ok")
 	rwr.Write(js)
 }
 
-func (srv *DServ) RemoveTask(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) removeTask(rwr http.ResponseWriter, req *http.Request) {
 	srv.oplock.Lock()
 	defer func() {
 		srv.oplock.Unlock()
@@ -249,7 +256,7 @@ func (srv *DServ) RemoveTask(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Write(js)
 }
 
-func (srv *DServ) ProgressJson(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) progressJson(rwr http.ResponseWriter, req *http.Request) {
 	rwr.Header().Set("Access-Control-Allow-Origin", "*")
 	jbs := make([]DJob, 0, len(srv.dls))
 	for ind, i := range srv.dls {

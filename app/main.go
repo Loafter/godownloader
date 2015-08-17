@@ -22,6 +22,7 @@ func main() {
 	go func() {
 		<-c
 		func() {
+			gdownsrv.StopAllTask()
 			log.Println("info: save setting ", gdownsrv.SaveSettings("./.godownload"))
 		}()
 		os.Exit(1)

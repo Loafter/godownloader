@@ -148,6 +148,7 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 		//ok download part complete normal
 		pd.file.Sync()
 		pd.req.Body.Close()
+		pd.dp.Speed = 0
 		log.Printf("info: download complete normal")
 		return true, nil
 	}

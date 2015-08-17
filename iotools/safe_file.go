@@ -21,10 +21,6 @@ func (sf *SafeFile) Sync() error {
 	defer sf.lock.Unlock()
 	return sf.File.Sync()
 }
-func Open(name string) (file *SafeFile, err error) {
-	f, err := os.OpenFile(name, os.O_RDONLY, 0)
-	return &SafeFile{File: f}, err
-}
 
 func CreateSafeFile(name string) (file *SafeFile, err error) {
 	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
