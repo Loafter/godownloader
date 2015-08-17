@@ -37,13 +37,41 @@ func (srv *DServ) Start(listenPort int) error {
 	http.HandleFunc("/remove_task", srv.RemoveTask)
 	http.HandleFunc("/start_task", srv.StartTask)
 	http.HandleFunc("/stop_task", srv.StopTask)
-
 	http.HandleFunc("/start_all_task", srv.StartAllTask)
 	http.HandleFunc("/stop_all_task", srv.StopAllTask)
-
 	http.HandleFunc("/index.html", srv.index)
 	if err := http.ListenAndServe(":"+strconv.Itoa(listenPort), nil); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (srv *DServ) SaveSettings(sf string) error {
+	var ss ServiceSettings
+	for _, i := range srv.dls {
+
+		ss.Ds = append(ss.Ds, DownloadSettings{
+			FI: i.Fi,
+			Dp: i.GetProgress(),
+		})
+	}
+
+	return ss.SaveToFile(sf)
+}
+
+func (srv *DServ) LoadSettings(sf string) error {
+	ss, err := LoadFromFile(sf)
+	if err != nil {
+		log.Println("error: when try load settings", err)
+		return err
+	}
+	log.Println(ss)
+	for _, r := range ss.Ds {
+		dl, err := httpclient.RestoreDownloader(r.FI.Url, r.FI.FileName, r.Dp)
+		if err != nil {
+			return err
+		}
+		srv.dls = append(srv.dls, dl)
 	}
 	return nil
 }
@@ -165,10 +193,7 @@ func (srv *DServ) StartAllTask(rwr http.ResponseWriter, req *http.Request) {
 		return
 	}
 	for _, e := range srv.dls {
-		if err := e.StartAll(); err != nil {
-			http.Error(rwr, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		e.StartAll()
 	}
 	js, _ := json.Marshal("ok")
 	rwr.Write(js)

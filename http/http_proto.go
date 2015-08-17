@@ -49,9 +49,9 @@ func GetSize(urls string) (int64, error) {
 }
 
 type DownloadProgress struct {
-	From          int64
-	To            int64
-	Pos           int64
+	From          int64 `json:"From"`
+	To            int64 `json:"To"`
+	Pos           int64 `json:"Pos"`
 	BytesInSecond int64
 	Speed         int64
 	Lsmt          time.Time
@@ -64,11 +64,11 @@ type PartialDownloader struct {
 	file   *iotools.SafeFile
 }
 
-func CreatePartialDownloader(url string, file *iotools.SafeFile, pos int64, to int64) *PartialDownloader {
+func CreatePartialDownloader(url string, file *iotools.SafeFile, from int64, pos int64, to int64) *PartialDownloader {
 	var pd PartialDownloader
 	pd.file = file
 	pd.url = url
-	pd.dp.From = pos
+	pd.dp.From = from
 	pd.dp.To = to
 	pd.dp.Pos = pos
 	return &pd
