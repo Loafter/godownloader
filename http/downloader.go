@@ -3,6 +3,9 @@ package httpclient
 import (
 	"godownloader/iotools"
 	"godownloader/monitor"
+	"os"
+	"strconv"
+	"os/user"
 )
 
 type FileInfo struct {
@@ -30,13 +33,21 @@ func (dl *Downloader) GetProgress() []DownloadProgress {
 	}
 	return re
 }
+func getDown()(string){
+	usr, _ := user.Current()
+	st:=strconv.QuoteRune(os.PathSeparator)
+	st=st[1:len(st)-1]
+	return usr.HomeDir+st+"Downloads"+st
+}
 func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err error) {
 	c, err := GetSize(url)
 	if err != nil {
 		//can't get file size
 		return nil, err
 	}
-	sf, err := iotools.CreateSafeFile(fp)
+
+	dfs:=getDown()+fp
+	sf, err := iotools.CreateSafeFile(dfs)
 	if err != nil {
 		//can't create file on path
 		return nil, err
@@ -68,13 +79,16 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 	return &d, nil
 }
 
+
+
 func RestoreDownloader(url string, fp string, dp []DownloadProgress) (dl *Downloader, err error) {
 	c, err := GetSize(url)
 	if err != nil {
 		//can't get file size
 		return nil, err
 	}
-	sf, err := iotools.OpenSafeFile(fp)
+	dfs:=getDown()+fp
+	sf, err := iotools.OpenSafeFile(dfs)
 	if err != nil {
 		//can't create file on path
 		return nil, err
