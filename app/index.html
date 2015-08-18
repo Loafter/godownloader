@@ -214,19 +214,9 @@
 		}
 
 
-		function StopDownload() {
-			var grid = $("#jqGrid");
-			var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
-			var req = rowKey;
-			$.ajax({
-					url: "/stop_task",
-					type: "POST",
-					data: JSON.stringify(req),
-					dataType: "text"
-				})
-				.error(function(jsonData) {
-					console.log(jsonData)
-				})
+		function OnChangeUrl() {
+			var filename = $("#url_id").val().split('/').pop()
+			$("#save_path_id").val(filename)
 		}
 	</script>
 </head>
@@ -297,7 +287,7 @@
 					<label class="control-label">Url</label>
 
 					<div class="controls">
-						<input type="text" id="url_id" class="form-control"
+						<input type="text" onchange="OnChangeUrl()" id="url_id" class="form-control"
 							   value="http://ucmirror.canterbury.ac.nz/linux/ubuntu/trusty/wubi.exe">
 					</div>
 					<label class="control-label">Save path</label>
