@@ -29,27 +29,6 @@
    <li>All files stored in <username>/Downloads</li>
   </ul>
   
-  <p>***BUG in windows version***</p>
-  <p>Save setting don't work when you kill application.<Br>
-if you pres cntrl+c in cmd mode save settings work normal.<Br>
-It happen in difference realization kill process linux and Windows<Br>
-in linux OS kill process work normal.<Br>
-App capture signal and do some cleanup stuff<Br
-	</p>
-<p><code>
-    gdownsrv := new(DownloadService.DServ)<Br>
-	c := make(chan os.Signal, 1)<Br>
-	signal.Notify(c, os.Interrupt)<Br>
-	signal.Notify(c, syscall.SIGTERM)<Br>
-	go func() {<Br>
-		<-c<Br>
-		func() {<Br>
-			gdownsrv.StopAllTask()<Br>
-			log.Println("info: save setting ", gdownsrv.SaveSettings(getSetPath()))<Br>
-		}()<Br>
-		os.Exit(1)<Br>
-	}()<Br>
-	</code></p>
     </section>
 
   
