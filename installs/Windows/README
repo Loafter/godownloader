@@ -1,10 +1,10 @@
-To run revice in cmd just run godownload.exe
-To run hiden user Start.bat
+To run service in cmd just run godownload.exe
+To run hide-mode Start.bat
 
 **BUG**
 save setting don't work when you kill application.
-if you use cntrl+c in cmd mode save settigs work normal.
-It happen in difference realizayion kill procees linux and Windows
+if you use cntrl+c in cmd mode save settings work normal.
+It happen in difference realization kill process linux and Windows
 in linux OS kill process work normal. App capture signal and do some cleanup stuff
 
     gdownsrv := new(DownloadService.DServ)
