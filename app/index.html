@@ -115,25 +115,25 @@
 
 		function FormatByte(cellValue, options, rowObject) {
 			var intVal = parseInt(cellValue);
-			var ras=" b."
-			if (intVal>1024){
-				intVal/=1024
-				ras=" kb."
+			var ras = " b."
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " kb."
 			}
-			if (intVal>1024){
-				intVal/=1024
-				ras=" Mb."
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " Mb."
 			}
-			if (intVal>1024){
-				intVal/=1024
-				ras=" Gb."
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " Gb."
 			}
 
-			if (intVal>1024){
-				intVal/=1024
-				ras=" Tb."
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " Tb."
 			}
-			var cellHtml = (intVal).toFixed(1)+ras;
+			var cellHtml = (intVal).toFixed(1) + ras;
 			return cellHtml;
 		}
 
@@ -288,13 +288,13 @@
 
 					<div class="controls">
 						<input type="text" onchange="OnChangeUrl()" id="url_id" class="form-control"
-							   value="http://ucmirror.canterbury.ac.nz/linux/ubuntu/trusty/wubi.exe">
+							   value="http://edistribution.health.ge.com/pub/distro/201411241401060.GEHC_2056275-025.ISO">
 					</div>
 					<label class="control-label">Save path</label>
 
 					<div class="controls">
 						<input type="text" id="save_path_id" class="form-control"
-							   value="wubi.exe">
+							   value="201411241401060.GEHC_2056275-025.ISO">
 					</div>
 					<label class="control-label">Parts count</label>
 					<select class="form-control" id="part_count_id">
