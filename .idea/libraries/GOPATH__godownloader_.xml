@@ -1,13 +1,20 @@
 <component name="libraryTable">
   <library name="GOPATH &lt;godownloader&gt;">
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/../lab5" />
+      <root url="file://$PROJECT_DIR$/../eadicomcollector" />
+      <root url="file://$PROJECT_DIR$/../rishl7" />
+      <root url="file://$PROJECT_DIR$/../geconv" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
     <excluded>
-      <root url="file://$PROJECT_DIR$/../lab5/.idea" />
+      <root url="file://$PROJECT_DIR$/../eadicomcollector/.idea" />
       <root url="file://$PROJECT_DIR$" />
+      <root url="file://$PROJECT_DIR$/../rishl7/.idea" />
+      <root url="file://$PROJECT_DIR$/../rishl7/.git" />
+      <root url="file://$PROJECT_DIR$/../geconv/.git" />
+      <root url="file://$PROJECT_DIR$/../geconv/.idea" />
+      <root url="file://$PROJECT_DIR$/../eadicomcollector/.git" />
     </excluded>
   </library>
 </component>
