@@ -182,9 +182,7 @@ func (srv *DServ) stopTask(rwr http.ResponseWriter, req *http.Request) {
 }
 
 func (srv *DServ) startAllTask(rwr http.ResponseWriter, req *http.Request) {
-	srv.oplock.Lock()
 	defer func() {
-		srv.oplock.Unlock()
 		req.Body.Close()
 	}()
 	_, err := ioutil.ReadAll(req.Body)
@@ -194,9 +192,7 @@ func (srv *DServ) startAllTask(rwr http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		return
 	}
-	for _, e := range srv.dls {
-		e.StartAll()
-	}
+	srv.StartAllTask()
 	js, _ := json.Marshal("ok")
 	rwr.Write(js)
 }
@@ -207,12 +203,20 @@ func (srv *DServ) StopAllTask() {
 		srv.oplock.Unlock()
 	}()
 	for _, e := range srv.dls {
-		e.StopAll()
+		log.Println("info stopall result:", e.StopAll())
 	}
 }
 
-func (srv *DServ) stopAllTask(rwr http.ResponseWriter, req *http.Request) {
+func (srv *DServ) StartAllTask() {
 	srv.oplock.Lock()
+	defer func() {
+		srv.oplock.Unlock()
+	}()
+	for _, e := range srv.dls {
+		log.Println("info start all result:", e.StartAll())
+	}
+}
+func (srv *DServ) stopAllTask(rwr http.ResponseWriter, req *http.Request) {
 	defer func() {
 		req.Body.Close()
 	}()

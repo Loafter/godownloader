@@ -191,6 +191,21 @@
 				})
 		}
 
+		function StopDownload() {
+			var grid = $("#jqGrid");
+			var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
+			var req = rowKey;
+			$.ajax({
+					url: "/stop_task",
+					type: "POST",
+					data: JSON.stringify(req),
+					dataType: "text"
+				})
+				.error(function(jsonData) {
+					console.log(jsonData)
+				})
+		}
+
 		function StartAllDownload() {
 			$.ajax({
 					url: "/start_all_task",
