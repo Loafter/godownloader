@@ -30,11 +30,13 @@
   </ul>
   
   <p>***BUG in windows version***</p>
-  <p><code>Save setting don't work when you kill application.<Br>
+  <p>Save setting don't work when you kill application.<Br>
 if you pres cntrl+c in cmd mode save settings work normal.<Br>
 It happen in difference realization kill process linux and Windows<Br>
 in linux OS kill process work normal.<Br>
-App capture signal and do some cleanup stuff<Br>
+App capture signal and do some cleanup stuff<Br
+	</p>
+<p>	<code>
     gdownsrv := new(DownloadService.DServ)<Br>
 	c := make(chan os.Signal, 1)<Br>
 	signal.Notify(c, os.Interrupt)<Br>
