@@ -1,11 +1,3 @@
 *All files stored in <username>/Downloads
 *Setting save in <username>./godownload. You can edit setting in json format
 *Setting save when you close application
-
-
-To install as service
-1. edit install.sh
-2. change user and group name
-3. sudo install.sh
-
-For run in cmd mode just open in terminal
