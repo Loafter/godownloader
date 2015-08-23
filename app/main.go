@@ -5,13 +5,19 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"os/user"
 	"runtime"
+	"strconv"
 	"syscall"
 )
 
-func cleanup() {
-	log.Println("cleanup")
+func getSetPath() string {
+	usr, _ := user.Current()
+	st := strconv.QuoteRune(os.PathSeparator)
+	st = st[1 : len(st)-1]
+	return usr.HomeDir + st + ".godownload"
 }
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -23,11 +29,11 @@ func main() {
 		<-c
 		func() {
 			gdownsrv.StopAllTask()
-			log.Println("info: save setting ", gdownsrv.SaveSettings("./.godownload"))
+			log.Println("info: save setting ", gdownsrv.SaveSettings(getSetPath()))
 		}()
 		os.Exit(1)
 	}()
-	gdownsrv.LoadSettings("./.godownload")
+	gdownsrv.LoadSettings(getSetPath())
 	log.Println("GUI located add http://localhost:9981/index.html")
 	log.Println(gdownsrv.Start(9981))
 }
