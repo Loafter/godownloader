@@ -32,6 +32,7 @@ type DServ struct {
 }
 
 func (srv *DServ) Start(listenPort int) error {
+	http.HandleFunc("/", srv.Redirect)
 	http.HandleFunc("/progress.json", srv.progressJson)
 	http.HandleFunc("/add_task", srv.addTask)
 	http.HandleFunc("/remove_task", srv.removeTask)
@@ -290,4 +291,7 @@ func (srv *DServ) progressJson(rwr http.ResponseWriter, req *http.Request) {
 	}
 	rwr.Write(js)
 
+}
+func (service *DServ) Redirect(responseWriter http.ResponseWriter, request *http.Request) {
+	http.Redirect(responseWriter, request, "/index.html", 301)
 }
