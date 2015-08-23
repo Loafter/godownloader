@@ -1,0 +1,5 @@
+To install as service
+1. edit install.sh
+2. change user and group name
+3. sudo install.sh
+
