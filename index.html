@@ -36,7 +36,7 @@ It happen in difference realization kill process linux and Windows<Br>
 in linux OS kill process work normal.<Br>
 App capture signal and do some cleanup stuff<Br
 	</p>
-<p>	<code>
+<p><code>
     gdownsrv := new(DownloadService.DServ)<Br>
 	c := make(chan os.Signal, 1)<Br>
 	signal.Notify(c, os.Interrupt)<Br>
