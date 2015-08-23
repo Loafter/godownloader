@@ -14,17 +14,39 @@
       <h1 class="project-name">Godownloader</h1>
       <h2 class="project-tagline">Http multi thread downloader</h2>
       <a href="https://github.com/Loafter/godownloader" class="btn">View on GitHub</a>
-      <a href="https://github.com/Loafter/godownloader/zipball/master" class="btn">Download release.zip</a>
+      <a href="https://github.com/Loafter/godownloader/releases/download/1.01/godownload.zip" class="btn">Download release</a>
       <a href="https://github.com/Loafter/godownloader/tarball/master" class="btn">Download source</a>
     </section>
 
     <section class="main-content">
       <h3>
-<a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to GoDownload manager</h3>
-
-<p></p>
-
-
+<a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to GoDownload manager!</h3>
+<p>This is simple download manager support multipart download and resume. For add, start|stop, remove download use web-gui</p>
+  <p>A couple of comments:</p>
+  <ul>
+   <li>To run service in cmd just run godownload</li>
+   <li>Setting save in <username>./godownload. You can edit setting in json forma</li>
+   <li>All files stored in <username>/Downloads</li>
+  </ul>
+  
+  
+  <p>Save setting don't work when you kill application.
+if you pres cntrl+c in cmd mode save settings work normal.
+It happen in difference realization kill process linux and Windows
+in linux OS kill process work normal.
+App capture signal and do some cleanup stuff
+    gdownsrv := new(DownloadService.DServ)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGTERM)
+	go func() {
+		<-c
+		func() {
+			gdownsrv.StopAllTask()
+			log.Println("info: save setting ", gdownsrv.SaveSettings(getSetPath()))
+		}()
+		os.Exit(1)
+	}()</p>
     </section>
 
   
