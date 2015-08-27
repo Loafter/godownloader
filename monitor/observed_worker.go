@@ -14,6 +14,12 @@ const (
 	Failed
 	Completed
 )
+type IterationWork interface {
+	DoWork() (bool, error)
+	GetProgress() interface{}
+	BeforeRun() error
+	AfterStop() error
+}
 
 func genUid() string {
 	b := make([]byte, 16)
@@ -31,12 +37,6 @@ type MonitoredWorker struct {
 	stwg  sync.WaitGroup
 }
 
-type IterationWork interface {
-	DoWork() (bool, error)
-	GetProgress() interface{}
-	BeforeRun() error
-	AfterStop() error
-}
 
 func (mw *MonitoredWorker) wgoroute() {
 	log.Println("info: work start", mw.GetId())
