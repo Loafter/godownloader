@@ -20,12 +20,12 @@ func TestMultiPartDownloadPool(t *testing.T) {
 	wp := monitor.WorkerPool{}
 	for i := int64(0); i < pc-1; i++ {
 		//log.Println(ps*i, ps*i+ps)
-		d := httpclient.CreatePartialDownloader(url, f, ps*i, ps*i+ps)
+		d := httpclient.CreatePartialDownloader(url, f, ps*i, ps*i, ps*i+ps)
 		mv := monitor.MonitoredWorker{Itw: d}
 		wp.AppendWork(&mv)
 	}
 	lastseg := c - (ps * (pc - 1))
-	dow := httpclient.CreatePartialDownloader(url, f, lastseg, c)
+	dow := httpclient.CreatePartialDownloader(url, f, lastseg,lastseg, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
 	wp.AppendWork(&mv)
 	wp.StartAll()

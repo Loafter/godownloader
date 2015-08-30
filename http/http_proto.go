@@ -84,7 +84,11 @@ func (pd *PartialDownloader) BeforeDownload() error {
 	if err != nil {
 		return err
 	}
+
 	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.Pos, 10)+"-"+strconv.FormatInt(pd.dp.To, 10))
+	f,_:=iotools.CreateSafeFile("test")
+	r.Write(f)
+	f.Close()
 	resp, err := pd.client.Do(r)
 	if err != nil {
 		log.Printf("error: error download part file%v \n", err)

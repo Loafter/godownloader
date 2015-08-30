@@ -12,8 +12,8 @@ func TestDownload(t *testing.T) {
 	if err != nil {
 		t.Error("failed: can't create downloader")
 	}
-	err = dl.StartAll()
-	if err != nil {
+	errs := dl.StartAll()
+	if len(errs)>0 {
 		t.Error("failed: can't start downloader")
 	}
 	for {

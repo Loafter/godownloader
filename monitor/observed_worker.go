@@ -14,7 +14,7 @@ const (
 	Failed
 	Completed
 )
-type IterationWork interface {
+type DiscretWork interface {
 	DoWork() (bool, error)
 	GetProgress() interface{}
 	BeforeRun() error
@@ -29,7 +29,7 @@ func genUid() string {
 
 type MonitoredWorker struct {
 	lc    sync.Mutex
-	Itw   IterationWork
+	Itw   DiscretWork
 	wgrun sync.WaitGroup
 	guid  string
 	state int

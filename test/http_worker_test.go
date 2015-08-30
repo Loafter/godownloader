@@ -17,7 +17,7 @@ func TestPartDownloadWorker(t *testing.T) {
 	f, _ := iotools.CreateSafeFile("g_ubuntu-14.04.2-server-amd64.list")
 	defer f.Close()
 	log.Println(f.Truncate(c))
-	dow := httpclient.CreatePartialDownloader(url, f, 0, c)
+	dow := httpclient.CreatePartialDownloader(url, f, 0,0, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
 	log.Println(mv.Start())
 	log.Println(mv.Start())
@@ -41,12 +41,12 @@ func TestMultiPartDownloadWorker(t *testing.T) {
 	ps := c / pc
 	for i := int64(0); i < pc-1; i++ {
 		//log.Println(ps*i, ps*i+ps)
-		d := httpclient.CreatePartialDownloader(url, f, ps*i, ps*i+ps)
+		d := httpclient.CreatePartialDownloader(url, f, ps*i, ps*i, ps*i+ps)
 		mv := monitor.MonitoredWorker{Itw: d}
 		mv.Start()
 	}
 	lastseg := c - (ps * (pc - 1))
-	dow := httpclient.CreatePartialDownloader(url, f, lastseg, c)
+	dow := httpclient.CreatePartialDownloader(url, f, lastseg, lastseg, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
 	mv.Start()
 
