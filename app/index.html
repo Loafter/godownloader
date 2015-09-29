@@ -62,7 +62,7 @@
 						label: 'Speed',
 						name: 'Speed',
 						width: 15,
-						formatter: FormatByte
+						formatter: FormatSpeedByte
 					}, {
 						label: 'Progress',
 						name: 'Progress',
@@ -115,23 +115,46 @@
 
 		function FormatByte(cellValue, options, rowObject) {
 			var intVal = parseInt(cellValue);
-			var ras = " b."
+			var ras = " B."
 			if(intVal > 1024) {
 				intVal /= 1024
-				ras = " kb."
+				ras = " KB."
 			}
 			if(intVal > 1024) {
 				intVal /= 1024
-				ras = " Mb."
+				ras = " MB."
 			}
 			if(intVal > 1024) {
 				intVal /= 1024
-				ras = " Gb."
+				ras = " GB."
 			}
 
 			if(intVal > 1024) {
 				intVal /= 1024
-				ras = " Tb."
+				ras = " TB."
+			}
+			var cellHtml = (intVal).toFixed(1) + ras;
+			return cellHtml;
+		}
+		function FormatSpeedByte(cellValue, options, rowObject) {
+			var intVal = parseInt(cellValue);
+			var ras = " B/sec."
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " KB/sec."
+			}
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " MB/sec."
+			}
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " GB/sec"
+			}
+
+			if(intVal > 1024) {
+				intVal /= 1024
+				ras = " TB."
 			}
 			var cellHtml = (intVal).toFixed(1) + ras;
 			return cellHtml;
