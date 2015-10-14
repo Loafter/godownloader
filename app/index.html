@@ -28,7 +28,7 @@
 		function UpdateTable() {
 			$("#jqGrid")
 				.jqGrid({
-					url: 'http://localhost:9981/progress.json',
+					url: 'http://'+location.hostname+':9981/progress.json',
 					mtype: "GET",
 					ajaxSubgridOptions: {
 						async: false
