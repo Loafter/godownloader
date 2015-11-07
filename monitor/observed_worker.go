@@ -40,7 +40,6 @@ type MonitoredWorker struct {
 
 func (mw *MonitoredWorker) wgoroute() {
 	log.Println("info: work start", mw.GetId())
-	mw.wgrun.Add(1)
 	defer func() {
 		log.Print("info: realease work guid ", mw.GetId())
 		mw.wgrun.Done()
@@ -97,6 +96,7 @@ func (mw *MonitoredWorker) Start() error {
 	}
 	mw.chsig = make(chan int, 1)
 	mw.state = Running
+	mw.wgrun.Add(1)
 	go mw.wgoroute()
 
 	return nil
@@ -116,7 +116,9 @@ func (mw *MonitoredWorker) Stop() error {
 		return err
 	}
 	return nil
-
+}
+func (mw *MonitoredWorker) Wait() {
+	mw.wgrun.Wait()
 }
 func (mw MonitoredWorker) GetProgress() interface{} {
 	return mw.Itw.GetProgress()
