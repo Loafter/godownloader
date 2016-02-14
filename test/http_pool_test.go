@@ -11,7 +11,7 @@ import (
 func TestMultiPartDownloadPool(t *testing.T) {
 	partcount := 10
 	pc := int64(partcount)
-	url := "http://mirror.yandex.ru/ubuntu-releases/15.04/ubuntu-15.04-snappy-amd64%2bgeneric.img.xz"
+	url := "http://pinegrow.s3.amazonaws.com/PinegrowLinux64.2.2.zip"
 	c, _ := httpclient.GetSize(url)
 	f, _ := iotools.CreateSafeFile("ubuntu-15.04-snappy-amd64+generic.img.xz ")
 	defer f.Close()
@@ -29,6 +29,6 @@ func TestMultiPartDownloadPool(t *testing.T) {
 	mv := monitor.MonitoredWorker{Itw: dow}
 	wp.AppendWork(&mv)
 	wp.StartAll()
-	time.Sleep(time.Second * 10000)
+	time.Sleep(time.Second * 30)
 
 }
